@@ -1,2 +1,3 @@
+include ':ScannerNative'
 include ':MediaScanner'
 rootProject.name = "carScanner"
