@@ -1,0 +1,2 @@
+include ':MediaScanner'
+rootProject.name = "carScanner"
