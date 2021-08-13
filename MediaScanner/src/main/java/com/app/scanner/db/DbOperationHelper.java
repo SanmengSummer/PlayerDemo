@@ -87,6 +87,18 @@ public class DbOperationHelper<T> implements INormalOp<T>{
         return false;
     }
 
+    @Override
+    public boolean deleteById(long id) {
+        try {
+            //按照id删除
+            mDaoSession.delete(id);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     /**
      * 删除所有记录
      */

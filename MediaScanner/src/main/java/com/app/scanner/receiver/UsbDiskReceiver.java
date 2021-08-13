@@ -14,6 +14,8 @@ import com.app.scanner.util.LogUtils;
 
 import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_ATTACHED;
 import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_DETACHED;
+import static com.app.scanner.ScannerService.MOCK_IN;
+import static com.app.scanner.ScannerService.MOCK_OUT;
 
 /**********************************************
  * Filename： UsbDiskReceiver
@@ -35,6 +37,7 @@ public class UsbDiskReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+        LogUtils.debug(action);
         if (ACTION_USB_DEVICE_DETACHED.equals(action)) {
             UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
             LogUtils.debug("拔出usb vendorId:" + device.getVendorId());
@@ -49,12 +52,11 @@ public class UsbDiskReceiver extends BroadcastReceiver {
                 context.sendBroadcast(childIntent);
             }
         } else if (ACTION_USB_DEVICE_ATTACHED.equals(action)) {
+
             UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
             for (UsbDevice device : usbManager.getDeviceList().values()) {
-
-                LogUtils.debug("插入usb vendorId:" + device.getVendorId());
                 CarUsbDevice tempDevice = DeviceManager.getInstance(context).getCarUsbDeviceByType(device.getVendorId());
-
+                LogUtils.debug("插入usb vendorId:" + device.getVendorId());
                 if (tempDevice == null && DeviceManager.getInstance(context).getDeviceByType(DeviceTypeEnum.USB_1) == null) {
                     tempDevice = (CarUsbDevice) DeviceManager.getInstance(context).createDevice(DeviceTypeEnum.USB_1);
                     tempDevice.setVendorId(device.getVendorId());
@@ -65,8 +67,13 @@ public class UsbDiskReceiver extends BroadcastReceiver {
                     tempDevice.setVendorId(device.getVendorId());
                     tempDevice.build(usbManager, device);
                 }
-
             }
+        }
+        if (MOCK_IN.equals(action)) {
+            LogUtils.debug("插入了usb");
+        }
+        if (MOCK_OUT.equals(action)) {
+            LogUtils.debug("拔出usb");
         }
     }
 }

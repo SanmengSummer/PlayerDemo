@@ -33,6 +33,8 @@ public class ScannerService extends Service {
 
     private UsbDiskReceiver mUsbReceiver;
 
+    public static final String MOCK_IN="com.app.scanner.usb_in";
+    public static final String MOCK_OUT="com.app.scanner.usb_out";
     @Override
     public void onCreate() {
         super.onCreate();
@@ -42,6 +44,8 @@ public class ScannerService extends Service {
         IntentFilter usbDeviceStateFilter = new IntentFilter();
         usbDeviceStateFilter.addAction(ACTION_USB_DEVICE_ATTACHED);
         usbDeviceStateFilter.addAction(ACTION_USB_DEVICE_DETACHED);
+        usbDeviceStateFilter.addAction(MOCK_IN);
+        usbDeviceStateFilter.addAction(MOCK_OUT);
 
 //        usbDeviceStateFilter.addDataScheme("file");
 

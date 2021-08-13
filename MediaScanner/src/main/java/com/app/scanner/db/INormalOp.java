@@ -28,6 +28,11 @@ public interface INormalOp<T> {
     public boolean delete(T entity);
 
     /**
+     * 删除单条记录
+     */
+    public boolean deleteById(long id);
+
+    /**
      * 删除所有记录
      */
     public boolean deleteAll();

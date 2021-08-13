@@ -1,11 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:background="@android:color/holo_orange_light"
+              android:background="@android:color/white"
+              android:orientation="vertical"
               android:layout_height="match_parent">
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:text="居中显示"
-              android:textColor="@android:color/black"
-              android:layout_gravity="center"/>
+    <TextView
+            android:id="@+id/tv_usb1_in"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#ff9a9a9a"
+            android:layout_marginTop="200px"
+            android:gravity="center_vertical"
+            android:text="模拟插入了U1盘"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"/>
 
+    <TextView
+            android:id="@+id/tv_usb1_out"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#ff9a9a9a"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:text="模拟拔出了U1盘"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"/>
+
+    <TextView
+            android:id="@+id/tv_usb2_in"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#ff9a9a9a"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"
+            android:gravity="center_vertical"
+            android:text="模拟插入了U2盘"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"/>
+
+    <TextView
+            android:id="@+id/tv_usb2_out"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#ff9a9a9a"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            android:text="模拟拔出了U2盘"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"/>
+    <TextView
+            android:id="@+id/tv_insert"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:background="#ff9a9a9a"
+            android:gravity="center_vertical"
+            android:text="插入一条音乐数据"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"/>
+    <TextView
+            android:id="@+id/tv_query"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#ff9a9a9a"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:text="查询当前一共有多少条音乐数据"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"/>
+
+    <TextView
+            android:id="@+id/tv_get"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#ff9a9a9a"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:text="显示当前第一条歌曲的名称"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"/>
+
+    <TextView
+            android:id="@+id/tv_update"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#ff9a9a9a"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:text="修改当前第一条数据歌名为：七里香"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"/>
+
+    <TextView
+            android:id="@+id/tv_delete"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#ff9a9a9a"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:text="删除第一条音乐数据"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"/>
 </LinearLayout>

@@ -32,19 +32,21 @@ public class AudioVo {
     private String favFlag;
 
 
-    private Long albumId; //该authId就是Author的主键id，注意类型一定要相同，这里都为long类型
+    private Long albumId;
 
 
-    private Long folderId; //该authId就是Author的主键id，注意类型一定要相同，这里都为long类型
+    private Long folderId;
 
-    private Long singerId; //该authId就是Author的主键id，注意类型一定要相同，这里都为long类型
+    private Long singerId;
+
+    private Long GenreId;
 
     private String suffix;
 
-    @Generated(hash = 71962206)
+    @Generated(hash = 269617448)
     public AudioVo(Long id, String name, String symbolName, String path,
             String size, String duration, String year, String favFlag, Long albumId,
-            Long folderId, Long singerId, String suffix) {
+            Long folderId, Long singerId, Long GenreId, String suffix) {
         this.id = id;
         this.name = name;
         this.symbolName = symbolName;
@@ -56,6 +58,7 @@ public class AudioVo {
         this.albumId = albumId;
         this.folderId = folderId;
         this.singerId = singerId;
+        this.GenreId = GenreId;
         this.suffix = suffix;
     }
 
@@ -149,6 +152,14 @@ public class AudioVo {
 
     public void setSingerId(Long singerId) {
         this.singerId = singerId;
+    }
+
+    public Long getGenreId() {
+        return this.GenreId;
+    }
+
+    public void setGenreId(Long GenreId) {
+        this.GenreId = GenreId;
     }
 
     public String getSuffix() {

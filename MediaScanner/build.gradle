@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.greenrobot.greendao'
+    id 'kotlin-android'
 }
 
 android {
@@ -58,6 +59,8 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'org.greenrobot:greendao:3.3.0'
+
+
 }
 
 preBuild {
@@ -75,4 +78,7 @@ preBuild {
             // nop, iml not found
         }
     }
+}
+repositories {
+    mavenCentral()
 }
