@@ -1,0 +1,63 @@
+plugins {
+    id 'com.android.application'
+    id 'org.greenrobot.greendao'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.landmark.mediaservice"
+        minSdkVersion 27
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("platform.jks")
+            storePassword 'android'
+            keyAlias 'key'
+            keyPassword 'android'
+        }
+
+        debug {
+            keyAlias 'key'
+            keyPassword 'android'
+            storeFile file('platform.jks')
+            storePassword 'android'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    greendao {
+        schemaVersion 1 //当前数据库版本
+        daoPackage 'com.landmark.media.db.dao'
+        targetGenDir 'src/main/java'
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    implementation 'org.greenrobot:greendao:3.3.0' // 添加库
+
+}
