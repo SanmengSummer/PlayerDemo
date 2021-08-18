@@ -17,4 +17,5 @@ public class Constants {
     @SuppressLint("SdCardPath")
     public static final String DB_DIR = "/data/data/com.landmark.media/scannerdb";
     public static final String DB_NAME = "RECORD_DB.db";
+    public static final String BROADCAST_ACTION = "com.android.network.change";
 }

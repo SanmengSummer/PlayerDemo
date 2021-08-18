@@ -14,6 +14,7 @@ import com.landmark.media.model.MediaDataModel;
 import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.utils.LogUtils;
 
+import java.util.Random;
 import java.util.function.Consumer;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -37,14 +38,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.button0:
                 //所有的数据
                 long l = SystemClock.currentThreadTimeMillis();
-                MediaData musicDataList = instance.getMusicDataList(0, 50,
+                MediaData musicDataList = instance.getMusicDataList(0, 30,
                         MediaIDHelper.getRootType(MediaIDHelper.TYPE_1));
                 long l1 = SystemClock.currentThreadTimeMillis() - l;
                 Log.d(TAG, "onCreate: " + l1);
                 musicDataList.getData().forEach(new Consumer<MediaDataModel>() {
                     @Override
                     public void accept(MediaDataModel dataModel) {
-                        Log.d(TAG, "->所有的数据 : " + dataModel.toString());
+                        Log.d(TAG, "->所有的数据 : " + dataModel.getName() + " *** " + dataModel.getItemType());
                     }
                 });
 
@@ -165,8 +166,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
             case R.id.button9:
-                search = instance.getSearch(0, 15,
-                        MediaIDHelper.getSearchRootType(MediaIDHelper.TYPE_1, "第", null));
+                //搜索全部
+                search = instance.getSearch(0, 35,
+                        MediaIDHelper.getSearchRootType(MediaIDHelper.TYPE_1, "杰", null));
                 Log.d(TAG, "onClick button9: " + search.getData().size());
                 search.getData().forEach(new Consumer<MediaDataModel>() {
                     @Override
@@ -178,9 +180,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         + " totalNum: " + search.getTotalNum() + " totalPage: " + search.getTotalPage());
                 break;
             case R.id.button10:
-                //专辑
+                //搜索专辑
                 search = instance.getSearch(0, 15,
-                        MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_ALBUM, true, MediaIDHelper.TYPE_1, "个"));
+                        MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_ALBUM,
+                                true, MediaIDHelper.TYPE_1, "个"));
                 Log.d(TAG, "onClick button10: " + search.getData().size());
                 search.getData().forEach(new Consumer<MediaDataModel>() {
                     @Override
@@ -192,9 +195,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         + " totalNum: " + search.getTotalNum() + " totalPage: " + search.getTotalPage());
                 break;
             case R.id.button11:
-                //歌手
+                //搜索歌手
                 search = instance.getSearch(0, 15,
-                        MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_ARTIST, true, MediaIDHelper.TYPE_1, "周"));
+                        MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_ARTIST,
+                                true, MediaIDHelper.TYPE_1, "周"));
                 Log.d(TAG, "onClick button10: " + search.getData().size());
                 search.getData().forEach(new Consumer<MediaDataModel>() {
                     @Override
@@ -206,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         + " totalNum: " + search.getTotalNum() + " totalPage: " + search.getTotalPage());
                 break;
             case R.id.button12:
-                //标题
+                //搜索标题
                 search = instance.getSearch(0, 15,
                         MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_TITLE,
                                 true, MediaIDHelper.TYPE_1, "香"));
@@ -221,9 +225,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         + " totalNum: " + search.getTotalNum() + " totalPage: " + search.getTotalPage());
                 break;
             case R.id.button13:
-                //流派
-                search = instance.getSearch(0, 15, MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_GENRE,
-                        true, MediaIDHelper.TYPE_1, "第"));
+                //搜索流派
+                search = instance.getSearch(0, 15,
+                        MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_GENRE,
+                                true, MediaIDHelper.TYPE_1, "第"));
                 Log.d(TAG, "onClick button13: " + search.getData().size());
                 search.getData().forEach(new Consumer<MediaDataModel>() {
                     @Override
@@ -237,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
             case R.id.button14:
+                //搜索全部
                 MediaDataModel mediaDataModel = search.getData().get(10);
                 String itemType = mediaDataModel.getItemType();
                 MediaData searchList = new MediaData();
@@ -274,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         + " totalNum: " + search.getTotalNum() + " totalPage: " + search.getTotalPage());
                 break;
             case R.id.button15:
-                //专辑
+                //搜索专辑
                 MediaData searchList2 = new MediaData();
                 searchList2 = instance.getSearchList(0, 15,
                         MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_ALBUM,
@@ -290,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         + " totalNum: " + searchList2.getTotalNum() + " totalPage: " + searchList2.getTotalPage());
                 break;
             case R.id.button16:
-                //歌手
+                //搜索歌手
                 MediaData searchList3 = new MediaData();
                 searchList3 = instance.getSearchList(0, 15,
                         MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_GENRE,
@@ -306,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         + " totalNum: " + searchList3.getTotalNum() + " totalPage: " + searchList3.getTotalPage());
                 break;
             case R.id.button17:
+                //搜索标题
                 MediaData searchList4 = new MediaData();
                 searchList4 = instance.getSearchList(0, 15,
                         MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_TITLE,
@@ -321,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         + " totalNum: " + searchList4.getTotalNum() + " totalPage: " + searchList4.getTotalPage());
                 break;
             case R.id.button18:
+                //搜索流派
                 MediaData searchList5 = new MediaData();
                 searchList5 = instance.getSearchList(0, 15,
                         MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_GENRE,
@@ -337,6 +345,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.button20:
+                //收藏
                 MediaData collectList = instance.getCollectList(0, 30);
                 collectList.getData().forEach(new Consumer<MediaDataModel>() {
                     @Override
@@ -348,16 +357,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         + " totalNum: " + collectList.getTotalNum() + " totalPage: " + collectList.getTotalPage());
                 break;
             case R.id.button21:
+                //添加收藏
                 boolean b = instance.addCollectList("8");
                 LogUtils.debug(TAG, " 添加状态 " + b);
                 break;
             case R.id.button22:
+                //取消收藏
                 boolean status = instance.cancelCollectList("8");
                 LogUtils.debug(TAG, " 取消状态 " + status);
                 break;
             case R.id.button23:
+                //清空收藏
                 boolean b1 = instance.clearCollectList();
                 LogUtils.debug(TAG, " 清空状态 " + b1);
+                break;
+            case R.id.button24:
+                //历史记录列表
+                MediaData historyList = instance.getHistoryList(0, 30);
+                historyList.getData().forEach(new Consumer<MediaDataModel>() {
+                    @Override
+                    public void accept(MediaDataModel dataModel) {
+                        Log.d(TAG, "历史记录列表 ->数据  : " + dataModel);
+                    }
+                });
+                LogUtils.debug(TAG, " page: " + historyList.getCurrentPage() + "size: " + historyList.getPageSize()
+                        + " totalNum: " + historyList.getTotalNum() + " totalPage: " + historyList.getTotalPage());
+
+                break;
+            case R.id.button25:
+                //添加历史记录
+                Random random = new Random();
+                int i = random.nextInt(40000);
+                while (i < 4) {
+                    i = random.nextInt();
+                }
+                boolean b2 = instance.addHistoryList("" + i, 00, 66);
+                LogUtils.debug(TAG, " 添加历史记录 " + b2);
+                break;
+            case R.id.button26:
+                //删除历史记录
+                boolean b3 = instance.clearHistoryList();
+                LogUtils.debug(TAG, " 删除历史记录 " + b3);
+                break;
+            case R.id.button27:
+                //查询最后一条数据
+                MediaData lastHistory = instance.getLastHistory();
+                MediaDataModel mediaDataModel1 = lastHistory.getData().get(0);
+                LogUtils.debug(TAG, " 查询最后一条数据 " + mediaDataModel1.toString());
                 break;
         }
     }

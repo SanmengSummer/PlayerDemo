@@ -16,6 +16,11 @@ public interface INormalOp<T> {
     public boolean insertMultiple(final List<T> pEntityList);
 
     /**
+     * 开启事务更新多条数据
+     */
+//    public boolean updateMultiple(List<T> pEntityList);
+
+    /**
      * 修改一条数据
      */
     public boolean update(T entity);

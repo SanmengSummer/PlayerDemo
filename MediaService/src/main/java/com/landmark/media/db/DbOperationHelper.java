@@ -2,10 +2,14 @@ package com.landmark.media.db;
 
 import com.landmark.media.db.dao.AudioVoDao;
 import com.landmark.media.db.dao.DaoSession;
+import com.landmark.media.db.dao.RecordVoDao;
 import com.landmark.media.db.table.AudioVo;
+import com.landmark.media.db.table.RecordVo;
 import com.landmark.media.interfaces.INormalOp;
 
 import org.greenrobot.greendao.AbstractDao;
+import org.greenrobot.greendao.async.AsyncSession;
+import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.List;
@@ -62,20 +66,17 @@ public class DbOperationHelper<T> implements INormalOp<T> {
         return false;
     }
 
-    public boolean updateMultiple(List<AudioVo> pEntityList) {
+    public boolean updateMultiples(List<T> pEntityList) {
         try {
-            AudioVoDao audioVoDao = mDaoSession.getAudioVoDao();
-//            if (audioVoDao != null) {
-//                audioVoDao.updateInTx(pEntityList);
-//            }
-            mDaoSession.runInTx(new Runnable() {
-                @Override
-                public void run() {
-                    for (AudioVo entity : pEntityList) {
-                        audioVoDao.update(entity);
-                    }
-                }
-            });
+            if (pEntityList.get(0) instanceof AudioVo) {
+                List<AudioVo> pEntityList1 = (List<AudioVo>) pEntityList;
+                AudioVoDao audioVoDao = mDaoSession.getAudioVoDao();
+                audioVoDao.updateInTx(pEntityList1);
+            } else if (pEntityList.get(0) instanceof RecordVo) {
+                List<RecordVo> pEntityList2 = (List<RecordVo>) pEntityList;
+                RecordVoDao audioVoDao = mDaoSession.getRecordVoDao();
+                audioVoDao.updateInTx(pEntityList2);
+            }
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -146,5 +147,11 @@ public class DbOperationHelper<T> implements INormalOp<T> {
         QueryBuilder<T> tQueryBuilder = mDaoSession.queryBuilder(entityClass);
         return tQueryBuilder;
     }
+
+    public Database queryBuilders() {
+        Database tQueryBuilder = mDaoSession.getDatabase();
+        return tQueryBuilder;
+    }
+
 
 }

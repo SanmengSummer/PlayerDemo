@@ -33,11 +33,11 @@ public interface IDataProvider {
 
     boolean clearCollectList();
 
-    boolean addHistoryList(String mediaId, long currentTime);
+    boolean addHistoryList(String mediaId, long currentTime, long endDuration);
 
     MediaData getHistoryList(int page, int size);
 
-    MediaData getHistory(String media);
+    MediaData getLastHistory();
 
     boolean clearHistoryList();
 

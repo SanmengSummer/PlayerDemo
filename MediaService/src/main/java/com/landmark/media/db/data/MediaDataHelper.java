@@ -1,11 +1,16 @@
 package com.landmark.media.db.data;
 
 import android.content.Context;
+import android.content.IntentFilter;
 
+import com.landmark.media.application.MediaApplication;
+import com.landmark.media.common.Constants;
 import com.landmark.media.interfaces.IDataProvider;
+import com.landmark.media.interfaces.IDeviceListener;
 import com.landmark.media.model.MediaData;
 import com.landmark.media.model.MediaDataModel;
 import com.landmark.media.model.TypeModel;
+import com.landmark.media.receiver.DeviceBroadcastReceiver;
 import com.landmark.media.utils.LogUtils;
 
 import java.util.ArrayList;
@@ -33,7 +38,10 @@ public class MediaDataHelper implements IDataProvider {
     /**
      * devices connect status
      */
-    private boolean isDevicesStatus = true;
+    private static boolean isDevicesStatus = true;
+
+    private DeviceBroadcastReceiver mDeviceBroadcastReceiver;
+    private IDeviceListener mListener;
 
     /**
      * get EngineeringModeManager.
@@ -57,14 +65,17 @@ public class MediaDataHelper implements IDataProvider {
      * register device listener
      */
     private void registerListener() {
-        //todo registerListener
+        mDeviceBroadcastReceiver = new DeviceBroadcastReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Constants.BROADCAST_ACTION);
+        MediaApplication.getContext().registerReceiver(mDeviceBroadcastReceiver, intentFilter);
     }
 
     /**
      * unregister device listener
      */
     private void unregisterListener() {
-        //todo unregisterListener
+        MediaApplication.getContext().unregisterReceiver(mDeviceBroadcastReceiver);
     }
 
     /**
@@ -294,7 +305,7 @@ public class MediaDataHelper implements IDataProvider {
         MediaData mediaData = new MediaData();
         List<MediaDataModel> mediaDataModels = new ArrayList<>();
         if (mMusicProvider != null) {
-            mediaDataModels = mMusicProvider.getCollectList(page, size,mediaData);
+            mediaDataModels = mMusicProvider.getCollectList(page, size, mediaData);
         }
         mediaData.setData(mediaDataModels);
         mediaData.setCurrentPage(page);
@@ -312,10 +323,10 @@ public class MediaDataHelper implements IDataProvider {
     }
 
     @Override
-    public boolean addHistoryList(String mediaId, long currentTime) {
+    public boolean addHistoryList(String mediaId, long currentTime, long endDuration) {
         boolean status = false;
         if (mMusicProvider != null && mediaId != null) {
-            status = mMusicProvider.addHistoryList(mediaId, 0);
+            status = mMusicProvider.addHistoryList(mediaId, currentTime, endDuration);
         }
         return status;
     }
@@ -329,7 +340,7 @@ public class MediaDataHelper implements IDataProvider {
         MediaData mediaData = new MediaData();
         List<MediaDataModel> mediaDataModels = new ArrayList<>();
         if (mMusicProvider != null) {
-            mediaDataModels = mMusicProvider.getHistoryList(page, size);
+            mediaDataModels = mMusicProvider.getHistoryList(page, size, mediaData);
         }
         mediaData.setData(mediaDataModels);
         mediaData.setCurrentPage(page);
@@ -338,15 +349,16 @@ public class MediaDataHelper implements IDataProvider {
     }
 
     @Override
-    public MediaData getHistory(String media) {
+    public MediaData getLastHistory() {
         MediaData mediaData = new MediaData();
         if (mMusicProvider != null) {
             List<MediaDataModel> mediaDataModels = new ArrayList<>();
-            mediaDataModels.add(mMusicProvider.getHistory(media));
+            mediaDataModels.add(mMusicProvider.getLastHistory());
             mediaData.setData(mediaDataModels);
         }
         return mediaData;
     }
+
 
     @Override
     public boolean clearHistoryList() {
@@ -378,5 +390,20 @@ public class MediaDataHelper implements IDataProvider {
         return new int[]{
                 page, size
         };
+    }
+
+    public void registerDeviceListener(IDeviceListener listener) {
+        mListener = listener;
+    }
+
+    public void onDestroy() {
+        unregisterListener();
+    }
+
+    public void setDevicesStatus(boolean devicesStatus) {
+        isDevicesStatus = devicesStatus;
+        if (mListener != null) {
+            mListener.onDeviceStatus(devicesStatus);
+        }
     }
 }
