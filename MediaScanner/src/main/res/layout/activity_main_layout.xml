@@ -102,4 +102,15 @@
             android:text="删除第一条音乐数据"
             android:textColor="@android:color/black"
             android:layout_gravity="center"/>
+
+    <TextView
+            android:id="@+id/tv_skip_jni"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#ff9a9a9a"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:text="跳转到JNI测试页面"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"/>
 </LinearLayout>

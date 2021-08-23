@@ -47,4 +47,9 @@ public interface INormalOp<T> {
      */
     public T queryById(long key);
 
+
+    /**
+     * 根据主键id查询记录
+     */
+    public T queryByKey(String key);
 }

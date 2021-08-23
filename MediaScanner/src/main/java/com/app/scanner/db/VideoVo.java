@@ -5,6 +5,7 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
+import org.greenrobot.greendao.annotation.Transient;
 
 /**********************************************
  * Filename： FileVo
@@ -35,6 +36,9 @@ public class VideoVo {
     private String favFlag;
 
     private Long folderId;
+
+    @Transient
+    private String  folder;
 
     private String suffix;
 
@@ -155,5 +159,12 @@ public class VideoVo {
     public void setSuffix(String suffix) {
         this.suffix = suffix;
     }
-    
+
+    public String getFolder() {
+        return folder;
+    }
+
+    public void setFolder(String folder) {
+        this.folder = folder;
+    }
 }

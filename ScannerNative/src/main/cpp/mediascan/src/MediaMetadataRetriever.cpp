@@ -5,7 +5,7 @@
 #include <Log.h>
 #include "MediaMetadataRetriever.h"
 
-#ifdef __ANDROID__
+#ifdef __ANDROID1__
 #include <media/CharacterEncodingDetector.h>
 #endif
 
@@ -81,7 +81,7 @@ int64_t MediaMetadataRetriever::getDuration() {
 void MediaMetadataRetriever::parseMetadata() {
     AVDictionaryEntry * entry = NULL;
     if (mAvFormatContext) {
-#ifdef __ANDROID__
+#ifdef __ANDROID1__
         android::CharacterEncodingDetector* detector = new android::CharacterEncodingDetector();
         while ((entry = av_dict_get(fmt_ctx_->metadata, "", entry, AV_DICT_IGNORE_SUFFIX)) != NULL) {
             detector->addTag(entry->key, entry->value);

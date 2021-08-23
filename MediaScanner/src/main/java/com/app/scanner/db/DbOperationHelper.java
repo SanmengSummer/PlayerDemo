@@ -1,6 +1,7 @@
 package com.app.scanner.db;
 
 import org.greenrobot.greendao.AbstractDao;
+import org.greenrobot.greendao.Property;
 import org.greenrobot.greendao.query.QueryBuilder;
 import org.greenrobot.greendao.query.WhereCondition;
 
@@ -129,4 +130,16 @@ public class DbOperationHelper<T> implements INormalOp<T>{
         return mDaoSession.load(entityClass, key);
     }
 
+    @Override
+    public T queryByKey(String key) {
+        return null;
+    }
+
+    public List queryByKey(AbstractDao dao, Property property, String key) {
+        List list = dao.queryBuilder().where(property.eq(key)).list();
+        if (list != null && list.size() > 0) {
+            return list;
+        }
+        return null;
+    }
 }

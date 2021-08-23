@@ -52,4 +52,8 @@ public class LogUtils {
     public static void warning( String str2, Throwable th) {
         Log.w(TAG,  "@: " + str2, th);
     }
+
+    public static String getSymbolName(String name){
+        return name;
+    }
 }

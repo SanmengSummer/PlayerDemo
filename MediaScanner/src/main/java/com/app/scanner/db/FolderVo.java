@@ -8,6 +8,7 @@ import org.greenrobot.greendao.annotation.ToMany;
 import java.util.List;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
+import org.greenrobot.greendao.annotation.Unique;
 
 /**********************************************
  * Filename： FileVo
@@ -27,6 +28,8 @@ public class FolderVo {
 
     private String name;
     private String symbolName;
+
+    @Unique
     private String path;
     private String parentPath;
     private String parentId;
@@ -80,4 +83,15 @@ public class FolderVo {
         this.parentId = parentId;
     }
 
+    @Override
+    public String toString() {
+        return "FolderVo{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", symbolName='" + symbolName + '\'' +
+                ", path='" + path + '\'' +
+                ", parentPath='" + parentPath + '\'' +
+                ", parentId='" + parentId + '\'' +
+                '}';
+    }
 }

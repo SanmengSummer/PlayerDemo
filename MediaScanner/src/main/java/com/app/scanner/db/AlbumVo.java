@@ -28,6 +28,7 @@ public class AlbumVo {
 
     private String name;
     private String symbolName;
+
     @Generated(hash = 89140298)
     public AlbumVo(Long id, String name, String symbolName) {
         this.id = id;

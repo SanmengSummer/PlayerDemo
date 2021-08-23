@@ -5,6 +5,7 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
+import org.greenrobot.greendao.annotation.Transient;
 
 /**********************************************
  * Filename： FileVo
@@ -26,6 +27,7 @@ public class AudioVo {
     private String symbolName;
 
     private String path;
+    private String title;
     private String size;
     private String duration;
     private String year;
@@ -34,23 +36,36 @@ public class AudioVo {
 
     private Long albumId;
 
+    @Transient
+    private String album;
 
     private Long folderId;
 
+    @Transient
+    private String folder;
+
     private Long singerId;
 
-    private Long GenreId;
+    @Transient
+    private String singer;
+
+    private Long genreId;
+
+    @Transient
+    private String genre;
 
     private String suffix;
 
-    @Generated(hash = 269617448)
+    @Generated(hash = 2072498362)
     public AudioVo(Long id, String name, String symbolName, String path,
-            String size, String duration, String year, String favFlag, Long albumId,
-            Long folderId, Long singerId, Long GenreId, String suffix) {
+            String title, String size, String duration, String year, String favFlag,
+            Long albumId, Long folderId, Long singerId, Long genreId,
+            String suffix) {
         this.id = id;
         this.name = name;
         this.symbolName = symbolName;
         this.path = path;
+        this.title = title;
         this.size = size;
         this.duration = duration;
         this.year = year;
@@ -58,7 +73,7 @@ public class AudioVo {
         this.albumId = albumId;
         this.folderId = folderId;
         this.singerId = singerId;
-        this.GenreId = GenreId;
+        this.genreId = genreId;
         this.suffix = suffix;
     }
 
@@ -96,6 +111,14 @@ public class AudioVo {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getTitle() {
+        return this.title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getSize() {
@@ -155,11 +178,11 @@ public class AudioVo {
     }
 
     public Long getGenreId() {
-        return this.GenreId;
+        return this.genreId;
     }
 
-    public void setGenreId(Long GenreId) {
-        this.GenreId = GenreId;
+    public void setGenreId(Long genreId) {
+        this.genreId = genreId;
     }
 
     public String getSuffix() {
@@ -170,5 +193,35 @@ public class AudioVo {
         this.suffix = suffix;
     }
 
+    public String getAlbum() {
+        return album;
+    }
 
+    public void setAlbum(String album) {
+        this.album = album;
+    }
+
+    public String getFolder() {
+        return folder;
+    }
+
+    public void setFolder(String folder) {
+        this.folder = folder;
+    }
+
+    public String getSinger() {
+        return singer;
+    }
+
+    public void setSinger(String singer) {
+        this.singer = singer;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
 }

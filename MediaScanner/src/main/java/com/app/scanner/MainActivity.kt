@@ -99,5 +99,12 @@ class MainActivity : Activity() {
             }
         }
 
+        findViewById<TextView>(R.id.tv_skip_jni).setOnClickListener {
+            var intent = Intent()
+            intent.setClass(this, TestJniMainAct::class.java)
+            startActivity(intent)
+        }
+
     }
+
 }

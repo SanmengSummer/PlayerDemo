@@ -46,7 +46,6 @@ public class DaoManager {
             }
             String dbDir = android.os.Environment.getExternalStorageDirectory().toString()+
                     "/scannerdb";
-
             DatabaseContext context = new DatabaseContext(CarApp.contextApp, dbDir);
             DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, DB_NAME, null);
             mDaoMaster = new DaoMaster(helper.getWritableDatabase());
