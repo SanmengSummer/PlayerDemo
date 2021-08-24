@@ -48,7 +48,7 @@ bool attachThreadToJVM(JNIEnv **env) {
 
 
 std::string listToString(std::list<MediaInfo::SharePtr> infos);
-
+static  int callCount = 0;
 class ListenerImpl : public MediaScannerManagerListener {
 public:
     ListenerImpl() = default;
@@ -88,7 +88,7 @@ public:
 
     void
     onFileInfoList(std::string deviceId, std::list<MediaInfo::SharePtr> infos, int type) override {
-
+        LOGD("JNI_OK:%s type:%d result:%s     %d",deviceId.c_str(),type,listToString(infos).c_str(),callCount++);
         JNIEnv *env;
         jboolean jboolean1 = attachThreadToJVM(&env);
 
@@ -130,42 +130,56 @@ std::string listToString(std::list<MediaInfo::SharePtr> infos) {
     return result.str();
 }
 
+std::string jstring2str(JNIEnv *env, jstring jstr) {
+    char *rtn = NULL;
+    jclass clsstring = env->FindClass("java/lang/String");
+    jstring strencode = env->NewStringUTF("UTF-8");
+    jmethodID mid = env->GetMethodID(clsstring, "getBytes", "(Ljava/lang/String;)[B");
+    jbyteArray barr = (jbyteArray) env->CallObjectMethod(jstr, mid, strencode);
+    jsize alen = env->GetArrayLength(barr);
+    jbyte *ba = env->GetByteArrayElements(barr, JNI_FALSE);
+    if (alen > 0) {
+        rtn = (char *) malloc(alen + 1);
+        memcpy(rtn, ba, alen);
+        rtn[alen] = 0;
+    }
+    env->ReleaseByteArrayElements(barr, ba, 0);
+    std::string stemp(rtn);
+    free(rtn);
+    return stemp;
+}
+
+
+#define pathDir2 "/Users/gaby/Downloads/test2"
 #define pathJson "C:/Users/yiwan/IdeaProjects/scanner/ScannerNative/src/main/cpp/example/config.json"
 #define pathDir1 "sdcard/scannerdb/test1/test1"
-#define pathDir2 "/Users/gaby/Downloads/test2"
-#define deviceId1 "device1"
 #define deviceId2 "device2"
+
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_landmark_scannernative_Test_native_1init(JNIEnv *env, jobject thiz) {
+Java_com_landmark_scannernative_Test_native_1stop(JNIEnv *env, jobject thiz, jstring device_id) {
+    manager->stop(jstring2str(env, device_id));
+}
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_landmark_scannernative_Test_native_1init(JNIEnv *env, jobject thiz, jstring device_id,
+                                                  jstring config_path, jstring scan_path) {
     jclass cls = env->FindClass("com/landmark/scannernative/Test");
     javaCallback.cls = static_cast<jclass>(env->NewGlobalRef(cls));
 
-
     MediaScannerManager *manager = new MediaScannerManager;
+
     ListenerImpl *listener = new ListenerImpl;
     manager->setMediaScannerManagerListener(listener);
-    manager->setConfigPath(pathJson);
+    manager->setConfigPath(jstring2str(env, config_path));
 
-
-    std::string device = manager->setScanPath(deviceId1, pathDir1);
+    std::string device = manager->setScanPath(jstring2str(env, device_id),
+                                              jstring2str(env, scan_path));
     manager->start(device);
+
+
 //    if(err == STATUS_OK)
 //        manager->wait(device);
 }
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_landmark_scannernative_Test_native_1setup(JNIEnv *env, jobject thiz) {
-    // TODO: implement native_setup()
-}
-extern "C" JNIEXPORT jstring
-JNICALL
-Java_com_landmark_scannernative_Test_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */) {
-    std::string hello = "nihao9527";
-    return env->NewStringUTF(hello.c_str());
-}
-
