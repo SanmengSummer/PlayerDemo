@@ -65,6 +65,29 @@ public class RecordVo implements Parcelable {
         playTime = in.readString();
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (id == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(id);
+        }
+        if (mediaId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(mediaId);
+        }
+        dest.writeString(endDuration);
+        dest.writeString(playTime);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
     public static final Creator<RecordVo> CREATOR = new Creator<RecordVo>() {
         @Override
         public RecordVo createFromParcel(Parcel in) {
@@ -200,28 +223,5 @@ public class RecordVo implements Parcelable {
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getRecordVoDao() : null;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        if (id == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(id);
-        }
-        if (mediaId == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(mediaId);
-        }
-        dest.writeString(endDuration);
-        dest.writeString(playTime);
     }
 }

@@ -23,6 +23,7 @@ import com.landmark.media.common.MetadataTypeValue;
 import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.demo.adapter.SearchAdapter;
 import com.landmark.media.demo.common.Constants;
+import com.landmark.media.interfaces.IDeviceListener;
 import com.landmark.media.model.MediaData;
 import com.landmark.media.model.MediaDataModel;
 import com.landmark.media.utils.LogUtils;
@@ -59,7 +60,6 @@ public class CollectHistoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collect_history);
         mHandler = new CollectHistoryActivity.MyHandler(this);
-        initRecycler();
         mInstance = MediaDataHelper.getInstance(this);
         mCurrent_pager = findViewById(R.id.current_pager);
         mTotal_pager = findViewById(R.id.total_pager);
@@ -67,7 +67,7 @@ public class CollectHistoryActivity extends AppCompatActivity {
         mllShowpager = findViewById(R.id.ll_showpager);
         mTotal_num = findViewById(R.id.total_num);
         mRl = findViewById(R.id.rl);
-
+        initRecycler();
     }
 
     public void initRecycler() {
@@ -75,6 +75,27 @@ public class CollectHistoryActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mSearchAdapter = new SearchAdapter(mSearch, this);
         mRecyclerView.setAdapter(mSearchAdapter);
+
+        androidx.appcompat.app.ActionBar supportActionBar = getSupportActionBar();
+        supportActionBar.setTitle("收藏及历史记录");
+        supportActionBar.setDisplayHomeAsUpEnabled(true);
+
+        //u盘 状态
+        mInstance.registerDeviceListener(new IDeviceListener() {
+            @Override
+            public void onDeviceStatus(boolean status, int actionUsbExtraStatusValue) {
+                if (!status) {
+                    mSearch.clear();
+                    mSearchAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return super.onSupportNavigateUp();
     }
 
     public void bt_collect(View view) {
@@ -150,7 +171,6 @@ public class CollectHistoryActivity extends AppCompatActivity {
      * @param model  当前点击的item数据
      */
     public void listener(List<MediaDataModel> models, int model) {
-        //todo 历史记录点击后的事件
         List<MediaDataModel> collect = models.stream().filter(new Predicate<MediaDataModel>() {
             @Override
             public boolean test(MediaDataModel model) {
@@ -218,7 +238,11 @@ public class CollectHistoryActivity extends AppCompatActivity {
         }
     }
 
-    public void setData(MediaData model, int arg1) {
+    /**
+     * @param model    数据
+     * @param position 点击的位置
+     */
+    public void setData(MediaData model, int position) {
         //todo 收藏历史点击后的事件
         LogUtils.debug(TAG, " MODEL: " + model.toString());
         model.getData().forEach(new Consumer<MediaDataModel>() {
@@ -227,7 +251,7 @@ public class CollectHistoryActivity extends AppCompatActivity {
                 LogUtils.debug(TAG, " accept MediaData: " + model.getName());
             }
         });
-        Toast.makeText(this, "" + model.getData().size() + " position: " + arg1, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "" + model.getData().size() + " position: " + position, Toast.LENGTH_SHORT).show();
     }
 
     public void bt_skip_search(View view) {

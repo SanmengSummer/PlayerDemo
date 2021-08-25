@@ -72,6 +72,12 @@
             android:layout_height="wrap_content"
             android:onClick="name_search"
             android:text="按歌名搜索" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="Test"
+            android:text="test" />
     </LinearLayout>
 
     <TextView
@@ -80,7 +86,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/ll_type2"
         android:text="当前列表："
-        android:textColor="@color/black"
         android:textSize="20sp" />
 
     <androidx.recyclerview.widget.RecyclerView

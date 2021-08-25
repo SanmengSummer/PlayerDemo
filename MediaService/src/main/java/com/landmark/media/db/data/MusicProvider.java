@@ -331,7 +331,8 @@ public class MusicProvider {
         mSearchAllData.clear();
         MediaDataModel[] value = new MediaDataModel[1];
         List<FolderVo> list5 = mFolderHelper.queryBuilder()
-                .where(FolderVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")).list();
+                .whereOr(FolderVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")
+                        , FolderVoDao.Properties.SymbolName.like("%" + typeModel.getCategory_name() + "%")).list();
         List<MediaDataModel> collect3 = list5.stream().map(new Function<FolderVo, MediaDataModel>() {
             @Override
             public MediaDataModel apply(FolderVo foldervo) {
@@ -346,12 +347,14 @@ public class MusicProvider {
         mSearchAllData.addAll(collect3);
 
         List<AudioVo> list1 = mAudioHelper.queryBuilder()
-                .where(AudioVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")).list();
+                .whereOr(AudioVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")
+                        , AudioVoDao.Properties.SymbolName.like("%" + typeModel.getCategory_name() + "%")).list();
         List<MediaDataModel> mediaDataModels = convertData(list1);
         mSearchAllData.addAll(mediaDataModels);
 
         List<AlbumVo> list2 = mAlbumHelper.queryBuilder()
-                .where(AlbumVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")).list();
+                .whereOr(AlbumVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")
+                        , AlbumVoDao.Properties.SymbolName.like("%" + typeModel.getCategory_name() + "%")).list();
         List<MediaDataModel> collect = list2.stream().map(new Function<AlbumVo, MediaDataModel>() {
             @Override
             public MediaDataModel apply(AlbumVo albumVo) {
@@ -366,7 +369,8 @@ public class MusicProvider {
         mSearchAllData.addAll(collect);
 
         List<GenreVo> list3 = mGenreVoHelper.queryBuilder()
-                .where(GenreVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")).list();
+                .whereOr(GenreVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")
+                        , GenreVoDao.Properties.SymbolName.like("%" + typeModel.getCategory_name() + "%")).list();
         List<MediaDataModel> collect1 = list3.stream().map(new Function<GenreVo, MediaDataModel>() {
             @Override
             public MediaDataModel apply(GenreVo genreVo) {
@@ -381,7 +385,8 @@ public class MusicProvider {
         mSearchAllData.addAll(collect1);
 
         List<SingerVo> list4 = mSingerHelper.queryBuilder()
-                .where(SingerVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")).list();
+                .whereOr(SingerVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")
+                ,SingerVoDao.Properties.SymbolName.like("%" + typeModel.getCategory_name() + "%")).list();
         List<MediaDataModel> collect2 = list4.stream().map(new Function<SingerVo, MediaDataModel>() {
             @Override
             public MediaDataModel apply(SingerVo singerVo) {

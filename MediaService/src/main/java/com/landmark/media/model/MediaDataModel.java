@@ -8,6 +8,7 @@ import com.landmark.media.db.table.FolderVo;
 import com.landmark.media.db.table.GenreVo;
 import com.landmark.media.db.table.RecordVo;
 import com.landmark.media.db.table.SingerVo;
+import com.landmark.media.utils.LogUtils;
 
 /**********************************************
  * Filename：
@@ -46,40 +47,8 @@ public class MediaDataModel implements Parcelable {
     private Long recordId;
     private RecordVo recordVo; //历史记录
 
-    public static final Creator<MediaDataModel> CREATOR = new Creator<MediaDataModel>() {
-        @Override
-        public MediaDataModel createFromParcel(Parcel in) {
-            return new MediaDataModel(in);
-        }
-
-        @Override
-        public MediaDataModel[] newArray(int size) {
-            return new MediaDataModel[size];
-        }
-    };
-
-    public boolean isFavFlag() {
-        return favFlag;
-    }
-
-    public Long getRecordId() {
-        return recordId;
-    }
-
-    public void setRecordId(Long recordId) {
-        this.recordId = recordId;
-    }
-
-    public RecordVo getRecordVo() {
-        return recordVo;
-    }
-
-    public void setRecordVo(RecordVo recordVo) {
-        this.recordVo = recordVo;
-    }
 
     protected MediaDataModel(Parcel in) {
-
         if (in.readByte() == 0) {
             id = null;
         } else {
@@ -125,6 +94,39 @@ public class MediaDataModel implements Parcelable {
         }
         recordVo = in.readParcelable(RecordVo.class.getClassLoader());
     }
+
+    public static final Creator<MediaDataModel> CREATOR = new Creator<MediaDataModel>() {
+        @Override
+        public MediaDataModel createFromParcel(Parcel in) {
+            return new MediaDataModel(in);
+        }
+
+        @Override
+        public MediaDataModel[] newArray(int size) {
+            return new MediaDataModel[size];
+        }
+    };
+
+    public boolean isFavFlag() {
+        return favFlag;
+    }
+
+    public Long getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
+    }
+
+    public RecordVo getRecordVo() {
+        return recordVo;
+    }
+
+    public void setRecordVo(RecordVo recordVo) {
+        this.recordVo = recordVo;
+    }
+
 
     public Long getGenreId() {
         return GenreId;
@@ -352,5 +354,12 @@ public class MediaDataModel implements Parcelable {
             dest.writeLong(GenreId);
         }
         dest.writeParcelable(genreVo, flags);
+        if (recordId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(recordId);
+        }
+        dest.writeParcelable(recordVo, flags);
     }
 }

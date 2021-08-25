@@ -23,6 +23,7 @@ import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.db.data.MediaIDHelper;
 import com.landmark.media.demo.adapter.SearchAdapter;
 import com.landmark.media.demo.common.Constants;
+import com.landmark.media.interfaces.IDeviceListener;
 import com.landmark.media.model.MediaData;
 import com.landmark.media.model.MediaDataModel;
 import com.landmark.media.utils.LogUtils;
@@ -87,6 +88,18 @@ public class HomeActivity extends AppCompatActivity {
         mSearchAdapter = new SearchAdapter(mSearch, this);
         mRecyclerView.setAdapter(mSearchAdapter);
         name_search(null);
+
+        androidx.appcompat.app.ActionBar supportActionBar = getSupportActionBar();
+        supportActionBar.setTitle("首页");
+        mInstance.registerDeviceListener(new IDeviceListener() {
+            @Override
+            public void onDeviceStatus(boolean status, int actionUsbExtraStatusValue) {
+                if (!status) {
+                    mSearch.clear();
+                    mSearchAdapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
     private void saveStatus(String type, String id, boolean b) {
@@ -273,6 +286,7 @@ public class HomeActivity extends AppCompatActivity {
         MediaData search = mInstance.getMusicDataList(mSearchCurrentPage, mSearchSize,
                 MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_ROOT,
                         false, MediaIDHelper.TYPE_1));
+
         Log.d(TAG, "onClick button10: " + search.getData().size());
 
         search.getData().forEach(new Consumer<MediaDataModel>() {
@@ -389,10 +403,10 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     /**
-     * @param model 数据对象
-     * @param arg1  点击的当前位置
+     * @param model    数据对象
+     * @param position 点击的当前位置
      */
-    public void setData(MediaData model, int arg1) {
+    public void setData(MediaData model, int position) {
         //todo home点击后的事件
         LogUtils.debug(TAG, " MODEL: " + model.toString());
         model.getData().forEach(new Consumer<MediaDataModel>() {
@@ -401,7 +415,7 @@ public class HomeActivity extends AppCompatActivity {
                 LogUtils.debug(TAG, " accept MediaData: " + model.getName());
             }
         });
-        Toast.makeText(this, "" + model.getData().size() + " position: " + arg1, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "" + model.getData().size() + " position: " + position, Toast.LENGTH_SHORT).show();
     }
 
     public void bt_skip_search(View view) {

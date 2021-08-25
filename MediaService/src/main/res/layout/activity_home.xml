@@ -62,7 +62,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/ll_type"
         android:text="当前列表："
-        android:textColor="@color/black"
         android:textSize="20sp" />
 
     <androidx.recyclerview.widget.RecyclerView

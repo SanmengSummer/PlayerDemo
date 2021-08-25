@@ -20,7 +20,6 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/image"
         android:text="我是文件夹"
-        android:textColor="@color/black"
         android:textSize="20dp" />
 
     <TextView

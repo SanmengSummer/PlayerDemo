@@ -3,7 +3,10 @@
     coreApp="true"
     package="com.landmark.media"
     android:sharedUserId="android.uid.system">
-
+    <!--
+    coreApp="true"
+    android:sharedUserId="android.uid.system"
+    -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
@@ -38,6 +41,7 @@
         <activity
             android:name=".MainActivity"
             android:screenOrientation="landscape">
+
             <!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

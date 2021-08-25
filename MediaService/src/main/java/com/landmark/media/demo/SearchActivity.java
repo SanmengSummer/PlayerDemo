@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,11 +23,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.landmark.media.R;
+import com.landmark.media.application.MediaApplication;
 import com.landmark.media.common.MetadataTypeValue;
 import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.db.data.MediaIDHelper;
 import com.landmark.media.demo.adapter.SearchAdapter;
 import com.landmark.media.demo.common.Constants;
+import com.landmark.media.interfaces.IDeviceListener;
 import com.landmark.media.model.MediaData;
 import com.landmark.media.model.MediaDataModel;
 import com.landmark.media.utils.LogUtils;
@@ -69,6 +72,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     String mediaId; //为当前歌曲的文件夹id
     public static final String MEDIAID_TAG = "mediaId";
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,11 +84,34 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             mediaId = intent.getStringExtra(MEDIAID_TAG);
             //当前歌曲的文件夹id
             if (mediaId == null) {
-//                mediaId = "1";
+                mediaId = "1";
             }
         }
         initView();
         initRecycler();
+
+        androidx.appcompat.app.ActionBar supportActionBar = getSupportActionBar();
+        supportActionBar.setTitle("搜索");
+        supportActionBar.setDisplayHomeAsUpEnabled(true);
+
+
+        mInstance.registerDeviceListener(new IDeviceListener() {
+            @Override
+            public void onDeviceStatus(boolean status, int actionUsbExtraStatusValue) {
+                LogUtils.debug(TAG, " registerDeviceListener onDeviceStatus status: " + status + " status"
+                        + actionUsbExtraStatusValue);
+                if (!status) {
+                    mSearch.clear();
+                    mSearchAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return super.onSupportNavigateUp();
     }
 
     private void initView() {
@@ -459,7 +486,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 searchList.getData().forEach(new Consumer<MediaDataModel>() {
                     @Override
                     public void accept(MediaDataModel dataModel) {
-                        Log.d(TAG, "文件夹 ->数据  : " + dataModel);
+                        Log.d(TAG, "专辑 ->数据  : " + dataModel);
                     }
                 });
                 mSearchAdapter.notifyDataSetChanged();
@@ -604,10 +631,10 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     /**
-     * @param model 数据集
-     * @param arg1  当前点击的位置
+     * @param model    数据集
+     * @param position 当前点击的位置
      */
-    public void setData(MediaData model, int arg1) {
+    public void setData(MediaData model, int position) {
         //todo 点击后的事件
         LogUtils.debug(TAG, " MODEL: " + model.toString());
         model.getData().forEach(new Consumer<MediaDataModel>() {
@@ -616,7 +643,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 LogUtils.debug(TAG, " accept MediaData: " + model.getName());
             }
         });
-        Toast.makeText(this, "" + model.getData().size() + " position: " + arg1, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "" + model.getData().size() + " position: " + position, Toast.LENGTH_SHORT).show();
     }
 
     static class MyHandler extends Handler {

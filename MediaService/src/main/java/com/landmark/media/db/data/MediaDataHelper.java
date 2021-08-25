@@ -1,7 +1,12 @@
 package com.landmark.media.db.data;
 
+import static android.content.Intent.ACTION_MEDIA_MOUNTED;
+import static android.content.Intent.ACTION_MEDIA_UNMOUNTED;
+import static android.os.Environment.MEDIA_MOUNTED;
+
 import android.content.Context;
 import android.content.IntentFilter;
+import android.widget.Toast;
 
 import com.landmark.media.application.MediaApplication;
 import com.landmark.media.common.Constants;
@@ -38,7 +43,7 @@ public class MediaDataHelper implements IDataProvider {
     /**
      * devices connect status
      */
-    private static boolean isDevicesStatus = true;
+    private static boolean isDevicesStatus = false;
 
     private DeviceBroadcastReceiver mDeviceBroadcastReceiver;
     private IDeviceListener mListener;
@@ -67,7 +72,9 @@ public class MediaDataHelper implements IDataProvider {
     private void registerListener() {
         mDeviceBroadcastReceiver = new DeviceBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Constants.BROADCAST_ACTION);
+        intentFilter.addAction(Constants.ACTION_USB_UN_MOUNTED);
+        intentFilter.addAction(Constants.ACTION_USB_MOUNTED);
+        intentFilter.addAction(Constants.ACTION_SCAN_STATUS);
         MediaApplication.getContext().registerReceiver(mDeviceBroadcastReceiver, intentFilter);
     }
 
@@ -115,7 +122,9 @@ public class MediaDataHelper implements IDataProvider {
     public MediaData getMusicDataList(int page, int size, String type) {
         LogUtils.debug(TAG, " getPlayingList type: " + type);
         MediaData mediaData = new MediaData();
+        mediaData.setData(new ArrayList<>());
         if (!isDevicesStatus) {
+            Toast.makeText(MediaApplication.getContext(), "请插入U盘", Toast.LENGTH_SHORT).show();
             LogUtils.debug(TAG, " getMusicDataList isDevicesStatus: " + isDevicesStatus);
             return mediaData;
         }
@@ -198,7 +207,9 @@ public class MediaDataHelper implements IDataProvider {
     @Override
     public MediaData getSearch(int page, int size, String type) {
         MediaData mediaData = new MediaData();
+        mediaData.setData(new ArrayList<>());
         if (!isDevicesStatus) {
+            Toast.makeText(MediaApplication.getContext(), "请插入U盘", Toast.LENGTH_SHORT).show();
             LogUtils.debug(TAG, " getSearch isDevicesStatus: " + isDevicesStatus);
             return mediaData;
         }
@@ -241,7 +252,9 @@ public class MediaDataHelper implements IDataProvider {
     @Override
     public MediaData getSearchList(int page, int size, String type) {
         MediaData mediaData = new MediaData();
+        mediaData.setData(new ArrayList<>());
         if (!isDevicesStatus) {
+            Toast.makeText(MediaApplication.getContext(), "请插入U盘", Toast.LENGTH_SHORT).show();
             LogUtils.debug(TAG, " getSearchList isDevicesStatus: " + isDevicesStatus);
             return mediaData;
         }
@@ -405,10 +418,18 @@ public class MediaDataHelper implements IDataProvider {
         unregisterListener();
     }
 
-    public void setDevicesStatus(boolean devicesStatus) {
+    /**
+     * @param devicesStatus
+     * @param actionUsbExtraStatusValue -1 卸载
+     *                                  1  开始
+     *                                  2  中断
+     *                                  3  结束
+     *                                  4  可以查询
+     */
+    public void setDevicesStatus(boolean devicesStatus, int actionUsbExtraStatusValue) {
         isDevicesStatus = devicesStatus;
         if (mListener != null) {
-            mListener.onDeviceStatus(devicesStatus);
+            mListener.onDeviceStatus(devicesStatus, actionUsbExtraStatusValue);
         }
     }
 }

@@ -32,20 +32,26 @@ public class MediaData implements Parcelable {
     public MediaData() {
     }
 
-    public MediaData(List<MediaDataModel> data, int totalPage, int currentPage, int pageSize, int totalNum) {
-        this.data = data;
-        this.totalPage = totalPage;
-        this.currentPage = currentPage;
-        this.pageSize = pageSize;
-        this.totalNum = totalNum;
-    }
-
     protected MediaData(Parcel in) {
         data = in.createTypedArrayList(MediaDataModel.CREATOR);
         totalPage = in.readInt();
         currentPage = in.readInt();
         pageSize = in.readInt();
         totalNum = in.readInt();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(data);
+        dest.writeInt(totalPage);
+        dest.writeInt(currentPage);
+        dest.writeInt(pageSize);
+        dest.writeInt(totalNum);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<MediaData> CREATOR = new Creator<MediaData>() {
@@ -100,19 +106,6 @@ public class MediaData implements Parcelable {
         this.totalNum = totalNum;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeTypedList(data);
-        dest.writeInt(totalPage);
-        dest.writeInt(currentPage);
-        dest.writeInt(pageSize);
-        dest.writeInt(totalNum);
-    }
 
     @Override
     public String toString() {

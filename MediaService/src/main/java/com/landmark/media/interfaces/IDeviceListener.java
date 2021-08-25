@@ -13,5 +13,5 @@ package com.landmark.media.interfaces;
  ***********************************************/
 public interface IDeviceListener {
     //devices status
-    void onDeviceStatus(boolean status);
+    void onDeviceStatus(boolean status, int actionUsbExtraStatusValue);
 }
