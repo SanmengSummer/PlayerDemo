@@ -170,7 +170,9 @@ void BFSTravel::startTravel(const char *rootDir) {
             }
         }
     }
+
     mListener->onTravelStatus(STATUS_FINISHED);
+
 }
 
 void BFSTravel::wait() {

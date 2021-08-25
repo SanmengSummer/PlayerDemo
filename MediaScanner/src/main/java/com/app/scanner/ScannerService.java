@@ -21,10 +21,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
-import com.app.scanner.receiver.UsbDiskReceiver;
 
+import com.app.scanner.db.DaoManager;
+import com.app.scanner.receiver.UsbDiskReceiver;
+import com.app.scanner.util.FileUtils;
+
+import static android.content.Intent.ACTION_MEDIA_MOUNTED;
+import static android.content.Intent.ACTION_MEDIA_UNMOUNTED;
 import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_ATTACHED;
 import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_DETACHED;
+import static android.os.Environment.MEDIA_MOUNTED;
 
 
 public class ScannerService extends Service {
@@ -42,14 +48,16 @@ public class ScannerService extends Service {
         mUsbReceiver = new UsbDiskReceiver();
 
         IntentFilter usbDeviceStateFilter = new IntentFilter();
-        usbDeviceStateFilter.addAction(ACTION_USB_DEVICE_ATTACHED);
-        usbDeviceStateFilter.addAction(ACTION_USB_DEVICE_DETACHED);
-        usbDeviceStateFilter.addAction(MOCK_IN);
-        usbDeviceStateFilter.addAction(MOCK_OUT);
+        usbDeviceStateFilter.addAction(ACTION_MEDIA_MOUNTED);
+        usbDeviceStateFilter.addAction(ACTION_MEDIA_UNMOUNTED);
+        usbDeviceStateFilter.addAction(MEDIA_MOUNTED);
 
-//        usbDeviceStateFilter.addDataScheme("file");
+
+        usbDeviceStateFilter.addDataScheme("file");
 
         registerReceiver(mUsbReceiver, usbDeviceStateFilter);
+
+        FileUtils.copyFilesFromRaw(this,R.raw.config,"config.json", DaoManager.getInstance().getDbPath());
     }
 
 

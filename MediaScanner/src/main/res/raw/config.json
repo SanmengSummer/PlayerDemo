@@ -1,0 +1,9 @@
+{
+	"NUM_LIMIT_FASTPLAY":1,
+	"NUM_LIMIT_BROWSE":2,
+	"NUM_LIMIT_DIR_DEPTH":20,
+	"NUM_LIMIT_RETRIEVER_THREADS":4,
+	"AUDIO_SUFFIX_SUPPORT":["mp3", "mp2", "wav", "aac", "dts", "ogg"],
+	"VIDEO_SUFFIX_SUPPORT":["mp4", "mkv", "ts", "mov"],
+	"IMAGE_SUFFIX_SUPPORT":["png", "jpg"]
+}

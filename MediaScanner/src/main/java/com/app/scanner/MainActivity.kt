@@ -28,6 +28,7 @@ class MainActivity : Activity() {
         setContentView(R.layout.activity_main_layout)
 
 
+
         val helper: DbOperationHelper<AudioVo> = DbOperationHelper<AudioVo>(
             AudioVo::class.java,
             DaoManager.getInstance().daoSession.audioVoDao

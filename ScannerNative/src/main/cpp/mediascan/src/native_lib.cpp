@@ -6,18 +6,13 @@
 
 #include <MediaStatus.h>
 #include <sstream>
-#include <MediaScannerManager.h>
+#include "native_lib.h"
+
 
 #define TAG "mediascanner"
 
 #include <Log.h>
 #include <iostream>
-
-typedef struct java_callback {
-    jclass cls;//回调需要的java bean
-} java_callback;
-
-java_callback javaCallback;
 
 
 static JavaVM *ms2_vm = NULL;
@@ -27,7 +22,64 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     return JNI_VERSION_1_6;
 }
 
-bool attachThreadToJVM(JNIEnv **env) {
+void
+ListenerImpl::onFileInfoList(std::string deviceId, std::list<MediaInfo::SharePtr> infos, int type) {
+
+    JNIEnv *env;
+    jboolean jboolean1 = attachThreadToJVM(&env);
+
+    jclass cls = javaCallback.cls;
+
+//2.获取方法id
+//clazz 类的字节码  name java方法名称  sig java方法签名
+//    jmethodID mid = env->GetMethodID(cls, "JNICallJava", "(Ljava/lang/String;)V");
+    jmethodID mid = javaCallback.midInfo;
+
+//3.实例化该类
+    jobject jobject = env->AllocObject(cls);
+
+//5.设置java层参数的值
+    jstring str = env->NewStringUTF(listToString(infos).str().c_str());
+    env->CallVoidMethod(jobject, mid, str);
+
+//删除引用
+    env->DeleteLocalRef(str);
+
+    env->DeleteLocalRef(jobject);
+//         env->DeleteGlobalRef(cls);
+}
+
+void ListenerImpl::onEvent(std::string deviceId, int event) {
+    LOGD("deviceId:%s,event:%d", deviceId.c_str(), event);
+    JNIEnv *env;
+    jboolean jboolean1 = attachThreadToJVM(&env);
+
+    jclass cls = javaCallback.cls;
+
+//2.获取方法id
+//clazz 类的字节码  name java方法名称  sig java方法签名
+    jmethodID mid = javaCallback.midStatus;
+
+//3.实例化该类
+    jobject jobject = env->AllocObject(cls);
+
+//5.设置java层参数的值
+
+    std::string str1 = deviceId;
+    std::string str2 = std::to_string(event);
+    std::string result = str1.append("#").append(str2);
+
+    jstring str = env->NewStringUTF(result.c_str());
+    env->CallVoidMethod(jobject, mid, str);
+
+//删除引用
+    env->DeleteLocalRef(str);
+
+    env->DeleteLocalRef(jobject);
+//         env->DeleteGlobalRef(cls);
+}
+
+bool ListenerImpl::attachThreadToJVM(JNIEnv **env) {
 
     bool ret = false;
 
@@ -47,74 +99,8 @@ bool attachThreadToJVM(JNIEnv **env) {
 }
 
 
-std::string listToString(std::list<MediaInfo::SharePtr> infos);
-static  int callCount = 0;
-class ListenerImpl : public MediaScannerManagerListener {
-public:
-    ListenerImpl() = default;
-
-    ~ListenerImpl() override = default;
-
-    void onEvent(std::string deviceId, int event) override {
-//        LOGD("deviceId:%s,event:%d", deviceId.c_str(), event);
-
-        JNIEnv *env;
-        jboolean jboolean1 = attachThreadToJVM(&env);
-
-        jclass cls = javaCallback.cls;
-
-        //2.获取方法id
-        //clazz 类的字节码  name java方法名称  sig java方法签名
-        jmethodID mid = env->GetMethodID(cls, "JNICallJavaStatus", "(Ljava/lang/String;)V");
-
-        //3.实例化该类
-        jobject jobject = env->AllocObject(cls);
-
-        //5.设置java层参数的值
-
-        std::string str1 = deviceId;
-        std::string str2 = std::to_string(event);
-        std::string result = str1.append("#").append(str2);
-
-        jstring str = env->NewStringUTF(result.c_str());
-        env->CallVoidMethod(jobject, mid, str);
-
-        //删除引用
-        env->DeleteLocalRef(str);
-
-        env->DeleteLocalRef(jobject);
-//         env->DeleteGlobalRef(cls);
-    }
-
-    void
-    onFileInfoList(std::string deviceId, std::list<MediaInfo::SharePtr> infos, int type) override {
-        LOGD("JNI_OK:%s type:%d result:%s     %d",deviceId.c_str(),type,listToString(infos).c_str(),callCount++);
-        JNIEnv *env;
-        jboolean jboolean1 = attachThreadToJVM(&env);
-
-        jclass cls = javaCallback.cls;
-
-        //2.获取方法id
-        //clazz 类的字节码  name java方法名称  sig java方法签名
-        jmethodID mid = env->GetMethodID(cls, "JNICallJava", "(Ljava/lang/String;)V");
-
-        //3.实例化该类
-        jobject jobject = env->AllocObject(cls);
-
-        //5.设置java层参数的值
-        jstring str = env->NewStringUTF(listToString(infos).c_str());
-        env->CallVoidMethod(jobject, mid, str);
-
-        //删除引用
-        env->DeleteLocalRef(str);
-
-        env->DeleteLocalRef(jobject);
-//         env->DeleteGlobalRef(cls);
-    }
-};
-
-std::string listToString(std::list<MediaInfo::SharePtr> infos) {
-    std::stringstream result;
+stringstream ListenerImpl::listToString(std::list<MediaInfo::SharePtr> infos) {
+    stringstream result;
     for (auto item : infos) {
         if (item->mFileType == MediaInfo::F_TYPE_AUDIO) {
             std::shared_ptr<MediaInfo> info = item;
@@ -127,10 +113,10 @@ std::string listToString(std::list<MediaInfo::SharePtr> infos) {
         }
 
     }
-    return result.str();
+    return result;
 }
 
-std::string jstring2str(JNIEnv *env, jstring jstr) {
+string ListenerImpl::jstring2str(JNIEnv *env, jstring jstr) {
     char *rtn = NULL;
     jclass clsstring = env->FindClass("java/lang/String");
     jstring strencode = env->NewStringUTF("UTF-8");
@@ -149,17 +135,13 @@ std::string jstring2str(JNIEnv *env, jstring jstr) {
     return stemp;
 }
 
-
-#define pathDir2 "/Users/gaby/Downloads/test2"
-#define pathJson "C:/Users/yiwan/IdeaProjects/scanner/ScannerNative/src/main/cpp/example/config.json"
-#define pathDir1 "sdcard/scannerdb/test1/test1"
-#define deviceId2 "device2"
-
+MediaScannerManager *manager = new MediaScannerManager;;
+ListenerImpl *listener = new ListenerImpl();
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_landmark_scannernative_Test_native_1stop(JNIEnv *env, jobject thiz, jstring device_id) {
-    manager->stop(jstring2str(env, device_id));
+    manager->stop(listener->jstring2str(env, device_id));
 }
 
 extern "C"
@@ -168,18 +150,15 @@ Java_com_landmark_scannernative_Test_native_1init(JNIEnv *env, jobject thiz, jst
                                                   jstring config_path, jstring scan_path) {
     jclass cls = env->FindClass("com/landmark/scannernative/Test");
     javaCallback.cls = static_cast<jclass>(env->NewGlobalRef(cls));
+    javaCallback.midInfo = static_cast<jmethodID>(env->GetMethodID(cls, "JNICallJava", "(Ljava/lang/String;)V"));
+    javaCallback.midStatus = static_cast<jmethodID>(env->GetMethodID(cls, "JNICallJavaStatus", "(Ljava/lang/String;)V"));
 
-    MediaScannerManager *manager = new MediaScannerManager;
 
-    ListenerImpl *listener = new ListenerImpl;
     manager->setMediaScannerManagerListener(listener);
-    manager->setConfigPath(jstring2str(env, config_path));
+    manager->setConfigPath(listener->jstring2str(env, config_path));
 
-    std::string device = manager->setScanPath(jstring2str(env, device_id),
-                                              jstring2str(env, scan_path));
+    std::string device = manager->setScanPath(listener->jstring2str(env, device_id),
+                                              listener->jstring2str(env, scan_path));
     manager->start(device);
 
-
-//    if(err == STATUS_OK)
-//        manager->wait(device);
 }

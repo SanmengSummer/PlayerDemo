@@ -11,6 +11,9 @@ import com.app.scanner.device.CarPlayDevice;
 import com.app.scanner.device.CarUsbDevice;
 import com.app.scanner.receiver.UsbDiskReceiver;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_ATTACHED;
 import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_DETACHED;
 
@@ -30,7 +33,7 @@ public class DeviceManager {
 
     private Context mContext;
 
-    private SparseArray<BaseDevice> sourceArray = new SparseArray<>();
+    private Map<String,BaseDevice> sourceArray = new HashMap<>();
 
     private DeviceManager(Context context) {
         this.mContext = context;
@@ -51,72 +54,25 @@ public class DeviceManager {
 
     }
 
-    public BaseDevice createDevice(DeviceTypeEnum typeEnum) {
+    public BaseDevice createDevice(String path) {
         BaseDevice deviceInfo = null;
-        if (typeEnum == DeviceTypeEnum.USB_1) {
+        if (sourceArray.get(path)==null) {
             deviceInfo = new CarUsbDevice(DeviceTypeEnum.USB_1);
         }
-        if (typeEnum == DeviceTypeEnum.USB_2) {
-            deviceInfo = new CarUsbDevice(DeviceTypeEnum.USB_2);
-        }
-        if (typeEnum == DeviceTypeEnum.CAR_PLAY) {
-            deviceInfo = new CarPlayDevice();
-        }
-        if (typeEnum == DeviceTypeEnum.CAR_LIFE) {
-            deviceInfo = new CarLifeDevice();
-        }
-        if (typeEnum == DeviceTypeEnum.BLUE_TOOTH) {
-            deviceInfo = new BlueToothDevice();
-        }
-
-        sourceArray.put(typeEnum.getIndex(), deviceInfo);
+        sourceArray.put(path, deviceInfo);
 
         return deviceInfo;
     }
 
 
-    public SparseArray<BaseDevice> getDeviceList() {
-        return sourceArray;
-    }
-
-    public synchronized BaseDevice getCurrentPlayDevice() {
-        for (int i = 0; i < sourceArray.size(); i++) {
-            if (sourceArray.valueAt(i).isConnect) {
-                return sourceArray.valueAt(i);
-            }
+    public synchronized CarUsbDevice getCarUsbDeviceByType(String path) {
+        if (sourceArray.get(path)!=null) {
+            return (CarUsbDevice) sourceArray.get(path);
         }
-        return null;
+         return null;
     }
 
-    public synchronized void changePlayDevice(DeviceTypeEnum typeEnum) {
-        for (int i = 0; i < sourceArray.size(); i++) {
-            if (sourceArray.valueAt(i).typeEnum.getIndex() == typeEnum.getIndex()) {
-                sourceArray.valueAt(i).isConnect = true;
-            } else {
-                sourceArray.valueAt(i).isConnect = false;
-            }
-        }
-    }
-
-    public BaseDevice getDeviceByType(DeviceTypeEnum typeEnum) {
-//        if (sourceArray.contains(typeEnum.getIndex())) {
-//            return sourceArray.get(typeEnum.getIndex());
-//        }
-        return null;
-    }
-
-    public synchronized CarUsbDevice getCarUsbDeviceByType(int vendorId) {
-        if (getDeviceByType(DeviceTypeEnum.USB_1) != null && ((CarUsbDevice) getDeviceByType(DeviceTypeEnum.USB_1)).getVendorId() == vendorId) {
-            return (CarUsbDevice) getDeviceByType(DeviceTypeEnum.USB_1);
-        } else if (getDeviceByType(DeviceTypeEnum.USB_2) != null && ((CarUsbDevice) getDeviceByType(DeviceTypeEnum.USB_2)).getVendorId() == vendorId) {
-            return (CarUsbDevice) getDeviceByType(DeviceTypeEnum.USB_2);
-        }
-        return null;
-    }
-
-    public synchronized void deleteDevice(DeviceTypeEnum typeEnum) {
-        if (getDeviceByType(typeEnum) != null) {
-            sourceArray.delete(typeEnum.getIndex());
-        }
+    public synchronized void deleteDevice(String path) {
+        sourceArray.remove(path);
     }
 }

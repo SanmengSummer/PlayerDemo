@@ -22,6 +22,11 @@ void MediaScanner::onTravel(std::list<MediaInfo::SharePtr> infos) {
 
 void MediaScanner::onTravelStatus(int status) {
     LOGD("device id: %s----------------- status:%d",mDeviceId.c_str(),status);
+    if(status == STATUS_FINISHED){
+        if (mRetrieverManager){
+            mRetrieverManager->finish();
+        }
+    }
     updateStatus(status);
 }
 

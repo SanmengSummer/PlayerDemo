@@ -18,6 +18,8 @@ package com.app.scanner.util;
 
 import android.util.Log;
 
+import com.github.promeg.pinyinhelper.Pinyin;
+
 public class LogUtils {
     private static final String TAG = "carScanner";
 
@@ -54,6 +56,6 @@ public class LogUtils {
     }
 
     public static String getSymbolName(String name){
-        return name;
+        return Pinyin.toPinyin(name,"");
     }
 }

@@ -22,17 +22,28 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("platform.jks")
+//            keyAlias 'key'
+//            storeFile file("platform.jks")
+//            storePassword 'android'
+//            keyPassword 'android'
+            //长城
+            storeFile file('platform.keystore')
             storePassword 'android'
-            keyAlias 'key'
+            keyAlias 'platform'
             keyPassword 'android'
         }
 
         debug {
-            keyAlias 'key'
-            keyPassword 'android'
-            storeFile file('platform.jks')
+//            keyAlias 'key'
+//            storeFile file('platform.jks')
+//            storePassword 'android'
+//            keyPassword 'android'
+
+            //长城
+            storeFile file('platform.keystore')
             storePassword 'android'
+            keyAlias 'platform'
+            keyPassword 'android'
         }
     }
 
@@ -68,7 +79,7 @@ dependencies {
     implementation 'org.greenrobot:greendao:3.3.0'
 
     implementation project(':ScannerNative')
-
+    implementation 'com.github.promeg:tinypinyin:2.0.3'
 
 }
 

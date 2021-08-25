@@ -1,6 +1,8 @@
 package com.app.scanner.db;
 
 import android.util.Log;
+import android.view.View;
+
 import com.app.scanner.BuildConfig;
 import com.app.scanner.CarApp;
 import org.greenrobot.greendao.query.QueryBuilder;
@@ -33,6 +35,12 @@ public class DaoManager {
         return manager;
     }
 
+    private String dbPath;
+
+    public String getDbPath() {
+        return dbPath;
+    }
+
     private DaoManager() {
         setDebug();
     }
@@ -45,7 +53,8 @@ public class DaoManager {
                 throw new RuntimeException("SD卡不存在，请加载SD卡");
             }
             String dbDir = android.os.Environment.getExternalStorageDirectory().toString()+
-                    "/scannerdb";
+                    "/scannerdb4";
+            dbPath=dbDir;
             DatabaseContext context = new DatabaseContext(CarApp.contextApp, dbDir);
             DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, DB_NAME, null);
             mDaoMaster = new DaoMaster(helper.getWritableDatabase());
@@ -76,7 +85,7 @@ public class DaoManager {
     }
 
     /**
-     * 关闭所有的操作，数据库开启后，使用完毕要关闭
+     * 关闭所有的操作，数据库开启后，使完毕要关闭
      */
     public void closeConnection() {
         closeHelper();
@@ -95,5 +104,15 @@ public class DaoManager {
             mDaoSession.clear();
             mDaoSession = null;
         }
+    }
+
+    public void deleteAllData(){
+        DaoManager.getInstance().getDaoSession().getFolderVoDao().deleteAll();
+        DaoManager.getInstance().getDaoSession().getAlbumVoDao().deleteAll();
+        DaoManager.getInstance().getDaoSession().getAudioVoDao().deleteAll();
+        DaoManager.getInstance().getDaoSession().getGenreVoDao().deleteAll();
+        DaoManager.getInstance().getDaoSession().getRecordVoDao().deleteAll();
+        DaoManager.getInstance().getDaoSession().getSingerVoDao().deleteAll();
+        DaoManager.getInstance().getDaoSession().getVideoVoDao().deleteAll();
     }
 }

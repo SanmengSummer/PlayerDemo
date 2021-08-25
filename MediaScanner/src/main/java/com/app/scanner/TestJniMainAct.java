@@ -12,7 +12,6 @@ import androidx.annotation.Nullable;
 import com.app.scanner.db.AudioDbHelper;
 import com.app.scanner.db.AudioVo;
 import com.app.scanner.db.DaoManager;
-import com.app.scanner.db.DbOperationHelper;
 import com.app.scanner.db.FolderDbHelper;
 import com.app.scanner.db.FolderVo;
 import com.app.scanner.db.StatusInfo;
@@ -24,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 import static com.app.scanner.util.LogUtils.getSymbolName;
 
@@ -49,7 +49,56 @@ public class TestJniMainAct extends Activity {
         TextView tv_clear = findViewById(R.id.tv_clear);
         TextView tv_video = findViewById(R.id.tv_video);
 
+//        StorageManager mStorageManager = (StorageManager) CarApp.contextApp.getSystemService(Context.STORAGE_SERVICE);
+//
+//        mStorageManager.registerListener(new StorageEventListener(){
+//            @Override
+//            public void onUsbMassStorageConnectionChanged(boolean connected) {
+//                super.onUsbMassStorageConnectionChanged(connected);
+//                LogUtils.err("onUsbMassStorageConnectionChanged");
+//            }
+//
+//            @Override
+//            public void onStorageStateChanged(String path, String oldState, String newState) {
+//                super.onStorageStateChanged(path, oldState, newState);
+//                LogUtils.err("onStorageStateChanged");
+//            }
+//
+//            @Override
+//            public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
+//                super.onVolumeStateChanged(vol, oldState, newState);
+//                LogUtils.err("onVolumeStateChanged");
+//            }
+//
+//            @Override
+//            public void onVolumeRecordChanged(VolumeRecord rec) {
+//                super.onVolumeRecordChanged(rec);
+//                LogUtils.err("onVolumeRecordChanged");
+//            }
+//
+//            @Override
+//            public void onVolumeForgotten(String fsUuid) {
+//                super.onVolumeForgotten(fsUuid);
+//
+//                LogUtils.err("onVolumeForgotten");
+//            }
+//
+//            @Override
+//            public void onDiskScanned(DiskInfo disk, int volumeCount) {
+//                super.onDiskScanned(disk, volumeCount);
+//
+//                LogUtils.err("onDiskScanned");
+//            }
+//
+//            @Override
+//            public void onDiskDestroyed(DiskInfo disk) {
+//                super.onDiskDestroyed(disk);
+//                LogUtils.err("onDiskDestroyed");
+//            }
+//        });
 
+
+//        RootCmd.getPath();
 
         final FolderDbHelper folderHelper = new FolderDbHelper(
                 FolderVo.class,
@@ -94,12 +143,11 @@ public class TestJniMainAct extends Activity {
         tv_video.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 Toast.makeText(TestJniMainAct.this, "size:+" + videoHelper.queryAll().size(), Toast.LENGTH_SHORT).show();
             }
         });
 
-        Test test = new Test(new Test.CallBackAudioInfo() {
+        Test test = new Test(CarApp.contextApp,new Test.CallBackAudioInfo() {
             @Override
             public void callBackAudioInfo(String msg) {
                 List<AudioVo> list = new ArrayList<>();
@@ -107,7 +155,7 @@ public class TestJniMainAct extends Activity {
                     String result[] = msg.split("@@");
                     for (int i = 0; i < result.length; i++) {
                         if (!TextUtils.isEmpty(result[i].trim())) {
-
+                             System.out.println("####:"+result[i].trim());
                             String tempStr[] = result[i].split(";");
                             Map<String, String> tempMap = new HashMap<>();
                             for (int j = 0; j < tempStr.length; j++) {
@@ -167,11 +215,14 @@ public class TestJniMainAct extends Activity {
                 StatusInfo info = new StatusInfo();
                 info.deviceId = msg.split("#")[0];
                 info.status = Integer.parseInt(msg.split("#")[1]);
-                System.out.println(info.toString());
             }
 
         });
-        test.stringFromJNI();
+        String configPath = "C:/Users/yiwan/IdeaProjects/scanner/ScannerNative/src/main/cpp/example/config.json";
+        String deviceId = "deviceId";
+        String scanPath = "sdcard/scannerdb/test1/test1";
+        test.native_init(deviceId, configPath, scanPath);
+
     }
 
 }

@@ -10,8 +10,14 @@
  ***********************************************/
 package com.landmark.scannernative;
 
+import android.content.Context;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,31 +35,55 @@ public class Test {
 
     static {
         System.loadLibrary("scanner_jni");
-        native_init();
     }
+    Context mContext;
 
+    private static Handler mHandler;
 
-    public Test(CallBackAudioInfo callBack) {
+    private static HandlerThread mHandlerThread;
+
+    public Test(Context context, CallBackAudioInfo callBack) {
         this.callBackAudioInfo = callBack;
+        this.mContext = context;
+        mHandlerThread = new HandlerThread("media_scanner_thread");
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                super.handleMessage(msg);
+                String info = (String) msg.obj;
+                if (msg.what == 0) {
+                    if (callBackAudioInfo != null && !TextUtils.isEmpty(info.trim())) {
+                        callBackAudioInfo.callBackAudioInfo(info);
+                    }
+                } else if (msg.what == 1) {
+                    if (callBackAudioInfo != null && !TextUtils.isEmpty(info.trim())) {
+                        callBackAudioInfo.callBackStatusInfo(info);
+                    }
+                }
+            }
+        };
+
     }
 
-    public native static void native_init();
+    public native void native_init(String deviceId, String configPath, String scanPath);
 
-    public native void native_setup();
+    public native void native_stop(String deviceId);
 
-    public native String stringFromJNI();
 
     //java层方法的具体实现
     public void JNICallJava(String msg) {
-        if (this.callBackAudioInfo != null && !TextUtils.isEmpty(msg.trim())) {
-            callBackAudioInfo.callBackAudioInfo(msg);
-        }
+        Message message = mHandler.obtainMessage();
+        message.what = 0;
+        message.obj = msg;
+        mHandler.handleMessage(message);
     }
 
     public void JNICallJavaStatus(String msg) {
-        if (this.callBackAudioInfo != null && !TextUtils.isEmpty(msg.trim())) {
-            callBackAudioInfo.callBackStatusInfo(msg);
-        }
+        Message message = mHandler.obtainMessage();
+        message.what = 1;
+        message.obj = msg;
+        mHandler.handleMessage(message);
     }
 
 

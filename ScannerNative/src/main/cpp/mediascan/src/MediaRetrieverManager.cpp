@@ -22,6 +22,7 @@ MediaRetrieverManager::MediaRetrieverManager()
 MediaRetrieverManager::~MediaRetrieverManager() {
     if(mThreads){
         delete mThreads;
+        mThreads = nullptr;
     }
 }
 
@@ -39,7 +40,8 @@ void MediaRetrieverManager::setScanThreadNum(int threadNum) {
     }
 //    mThreads->setThreadNum(num);
 }
-
+static int targetCnt = 0;
+static int compCnt = 0;
 void MediaRetrieverManager::setFilesToRetriever(std::list<MediaInfo::SharePtr> infos) {
     std::list<MediaInfo::SharePtr> list;
     for (auto item: infos) {
@@ -72,11 +74,12 @@ void MediaRetrieverManager::setFilesToRetriever(std::list<MediaInfo::SharePtr> i
                     sublist.assign(start, end);
                 }
                 auto ret = mThreads->enqueue(&MediaRetrieverManager::parseMetadata, this, sublist);
-                ret.wait();
+//                ret.wait();
             }
         } else {
+            LOGD("tar cnt : %d",++targetCnt);
             auto ret = mThreads->enqueue(&MediaRetrieverManager::parseMetadata, this, list);
-            ret.wait();
+//            ret.wait();
         }
     }
 
@@ -85,6 +88,7 @@ void MediaRetrieverManager::setFilesToRetriever(std::list<MediaInfo::SharePtr> i
 void MediaRetrieverManager::parseMetadata(std::list<MediaInfo::SharePtr> list) {
     MediaMetadataRetriever::SharePtr retriever = std::make_shared<MediaMetadataRetriever>();
     std::list<MediaInfo::SharePtr> result;
+    LOGD("tid");
     while (!list.empty()){
         auto  item = list.front();
         list.pop_front();
@@ -102,6 +106,7 @@ void MediaRetrieverManager::parseMetadata(std::list<MediaInfo::SharePtr> list) {
         }
         result.push_back(item);
     }
+    LOGD("comp cnt : %d tid:%x",++compCnt,std::this_thread::get_id());
     if(mRetrieverListener){
         mRetrieverListener->onRetrieverList(result);
     }
@@ -109,6 +114,15 @@ void MediaRetrieverManager::parseMetadata(std::list<MediaInfo::SharePtr> list) {
 
 void MediaRetrieverManager::setRetrieverManagerListener(RetrieverManagerListener *listener) {
     mRetrieverListener = listener;
+}
+
+void MediaRetrieverManager::finish() {
+    LOGD("---------------------1");
+    if(mThreads){
+        delete mThreads;
+        mThreads = nullptr;
+    }
+    LOGD("---------------------2");
 }
 
 

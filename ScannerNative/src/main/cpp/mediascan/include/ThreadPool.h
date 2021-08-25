@@ -10,6 +10,8 @@
 #include <stdexcept>
 #include <thread>
 #include <vector>
+#define TAG "ThreadPool"
+#include "Log.h"
 
 class ThreadPool {
 public:
@@ -79,6 +81,7 @@ auto ThreadPool::enqueue(F&& f, Args&&... args) -> std::future<typename std::res
 // the destructor joins all threads
 inline ThreadPool::~ThreadPool()
 {
+    LOGD("~ThreadPool     -----------------1");
     {
         std::unique_lock<std::mutex> lock(queue_mutex);
         stop = true;
@@ -86,6 +89,7 @@ inline ThreadPool::~ThreadPool()
     condition.notify_all();
     for (std::thread& worker : workers)
         worker.join();
+    LOGD("~ThreadPool     -----------------2");
 }
 
 //

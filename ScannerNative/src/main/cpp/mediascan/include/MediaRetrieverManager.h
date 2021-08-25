@@ -27,6 +27,7 @@ public:
     void setScanThreadNum(int threadNum);
     void setFilesToRetriever(std::list<MediaInfo::SharePtr> infos);
     void setRetrieverManagerListener(RetrieverManagerListener* listener);
+    void finish();
 private:
     void parseMetadata(std::list<MediaInfo::SharePtr> list);
 private:
