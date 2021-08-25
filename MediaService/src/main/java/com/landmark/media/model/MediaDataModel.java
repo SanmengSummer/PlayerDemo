@@ -3,13 +3,11 @@ package com.landmark.media.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.landmark.media.common.MetadataTypeValue;
 import com.landmark.media.db.table.AlbumVo;
 import com.landmark.media.db.table.FolderVo;
 import com.landmark.media.db.table.GenreVo;
 import com.landmark.media.db.table.RecordVo;
 import com.landmark.media.db.table.SingerVo;
-import com.landmark.media.utils.LogUtils;
 
 /**********************************************
  * Filename：

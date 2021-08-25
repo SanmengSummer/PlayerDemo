@@ -7,6 +7,7 @@ import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Keep;
 import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.DaoException;
 import com.landmark.media.db.dao.DaoSession;
@@ -130,13 +131,13 @@ public class RecordVo implements Parcelable {
     }
 
     /** To-one relationship, resolved on first access. */
-    @Generated(hash = 679260966)
+    @Keep
     public AudioVo getAudioVo() {
         Long __key = this.mediaId;
         if (audioVo__resolvedKey == null || !audioVo__resolvedKey.equals(__key)) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
+                return null;
             }
             AudioVoDao targetDao = daoSession.getAudioVoDao();
             AudioVo audioVoNew = targetDao.load(__key);

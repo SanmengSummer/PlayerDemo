@@ -3,6 +3,7 @@ package com.landmark.media.db.table;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.Keep;
 import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.DaoException;
 
@@ -229,13 +230,13 @@ public class AudioVo {
     }
 
     /** To-one relationship, resolved on first access. */
-    @Generated(hash = 590335922)
+    @Keep
     public AlbumVo getAlbumVo() {
         Long __key = this.albumId;
         if (albumVo__resolvedKey == null || !albumVo__resolvedKey.equals(__key)) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
+                return null;
             }
             AlbumVoDao targetDao = daoSession.getAlbumVoDao();
             AlbumVo albumVoNew = targetDao.load(__key);
@@ -258,13 +259,13 @@ public class AudioVo {
     }
 
     /** To-one relationship, resolved on first access. */
-    @Generated(hash = 2110994881)
+    @Keep
     public FolderVo getFolderVo() {
         Long __key = this.folderId;
         if (folderVo__resolvedKey == null || !folderVo__resolvedKey.equals(__key)) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
+                return null;
             }
             FolderVoDao targetDao = daoSession.getFolderVoDao();
             FolderVo folderVoNew = targetDao.load(__key);
@@ -287,13 +288,13 @@ public class AudioVo {
     }
 
     /** To-one relationship, resolved on first access. */
-    @Generated(hash = 1495377176)
+    @Keep
     public SingerVo getSingerVo() {
         Long __key = this.singerId;
         if (singerVo__resolvedKey == null || !singerVo__resolvedKey.equals(__key)) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
+                return null;
             }
             SingerVoDao targetDao = daoSession.getSingerVoDao();
             SingerVo singerVoNew = targetDao.load(__key);
@@ -316,13 +317,13 @@ public class AudioVo {
     }
 
     /** To-one relationship, resolved on first access. */
-    @Generated(hash = 2019356862)
+    @Keep
     public GenreVo getGenreVo() {
         Long __key = this.GenreId;
         if (genreVo__resolvedKey == null || !genreVo__resolvedKey.equals(__key)) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
+                return null;
             }
             GenreVoDao targetDao = daoSession.getGenreVoDao();
             GenreVo genreVoNew = targetDao.load(__key);

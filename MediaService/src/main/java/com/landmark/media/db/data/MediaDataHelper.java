@@ -392,6 +392,11 @@ public class MediaDataHelper implements IDataProvider {
         };
     }
 
+    /**
+     * device listener
+     *
+     * @param listener {@link IDeviceListener}
+     */
     public void registerDeviceListener(IDeviceListener listener) {
         mListener = listener;
     }

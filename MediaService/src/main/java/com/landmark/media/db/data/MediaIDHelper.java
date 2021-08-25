@@ -147,7 +147,7 @@ public class MediaIDHelper {
                 strType = category + CATEGORY_SEPARATOR + type[0];
             }
         }
-        LogUtils.debug(TAG, " getGenreType: " + strType);
+        LogUtils.debug(TAG, " getType: " + strType);
         return strType;
     }
 

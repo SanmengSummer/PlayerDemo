@@ -77,7 +77,7 @@ public class MediaData implements Parcelable {
     }
 
     public int getCurrentPage() {
-        return currentPage;
+        return currentPage + 1;
     }
 
     public void setCurrentPage(int currentPage) {

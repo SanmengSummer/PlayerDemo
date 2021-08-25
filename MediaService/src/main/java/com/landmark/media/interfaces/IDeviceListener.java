@@ -12,5 +12,6 @@ package com.landmark.media.interfaces;
  * V0.xx  2021/8/23 11  chenqiang   1) …
  ***********************************************/
 public interface IDeviceListener {
+    //devices status
     void onDeviceStatus(boolean status);
 }
