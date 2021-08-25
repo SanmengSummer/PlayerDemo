@@ -19,7 +19,6 @@ import com.app.scanner.util.LogUtils;
 import com.app.scanner.vo.MediaInfoVo;
 import com.landmark.scannernative.Test;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +26,7 @@ import java.util.Map;
 import static com.app.scanner.util.Constants.ACTION_SCAN_STATUS;
 import static com.app.scanner.util.Constants.ACTION_USB_EXTRA_NAME;
 import static com.app.scanner.util.Constants.ACTION_USB_EXTRA_STATUS;
+import static com.app.scanner.util.Constants.ACTION_USB_EXTRA_STATUS_VALUE;
 import static com.app.scanner.util.LogUtils.getSymbolName;
 
 
@@ -44,6 +44,7 @@ import static com.app.scanner.util.LogUtils.getSymbolName;
 public class CarUsbDevice extends BaseDevice {
     private String mScanPath;
     Test test;
+    private int count = 0;
 
     public CarUsbDevice(DeviceTypeEnum typeEnum) {
         super(typeEnum);
@@ -64,10 +65,10 @@ public class CarUsbDevice extends BaseDevice {
         test = new Test(CarApp.contextApp, new Test.CallBackAudioInfo() {
             @Override
             public void callBackAudioInfo(String msg) {
-                List<AudioVo> list = new ArrayList<>();
                 if (!TextUtils.isEmpty(msg.trim())) {
                     String result[] = msg.split("@@");
                     for (int i = 0; i < result.length; i++) {
+                        notifyToGetData();
                         if (!TextUtils.isEmpty(result[i].trim())) {
 
                             String tempStr[] = result[i].split(";");
@@ -120,6 +121,7 @@ public class CarUsbDevice extends BaseDevice {
                                 videoHelper.insert(videoVo);
                             }
                         }
+
                     }
                 }
             }
@@ -175,7 +177,16 @@ public class CarUsbDevice extends BaseDevice {
         LogUtils.debug("clear all data");
         DaoManager.getInstance().deleteAllData();
         test.native_stop(mScanPath);
-
     }
 
+    private void notifyToGetData() {
+        count++;
+        if (count == 10) {
+            LogUtils.debug("notifyToGetData");
+            Intent childIntent = new Intent();
+            childIntent.putExtra(ACTION_USB_EXTRA_STATUS, ACTION_USB_EXTRA_STATUS_VALUE);
+            CarApp.getInstance().sendBroadcast(childIntent);
+        }
+
+    }
 }

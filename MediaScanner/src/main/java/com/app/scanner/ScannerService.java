@@ -20,6 +20,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+
 import androidx.annotation.Nullable;
 
 import com.app.scanner.db.DaoManager;
@@ -28,8 +29,6 @@ import com.app.scanner.util.FileUtils;
 
 import static android.content.Intent.ACTION_MEDIA_MOUNTED;
 import static android.content.Intent.ACTION_MEDIA_UNMOUNTED;
-import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_ATTACHED;
-import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_DETACHED;
 import static android.os.Environment.MEDIA_MOUNTED;
 
 
