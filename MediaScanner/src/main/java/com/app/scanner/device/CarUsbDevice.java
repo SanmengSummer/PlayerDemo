@@ -4,21 +4,20 @@ package com.app.scanner.device;
 import android.content.Intent;
 import android.text.TextUtils;
 
-import com.app.scanner.BaseDevice;
 import com.app.scanner.CarApp;
-import com.app.scanner.DeviceTypeEnum;
 import com.app.scanner.db.AudioDbHelper;
-import com.app.scanner.db.AudioVo;
 import com.app.scanner.db.DaoManager;
 import com.app.scanner.db.FolderDbHelper;
-import com.app.scanner.db.FolderVo;
-import com.app.scanner.db.StatusInfo;
 import com.app.scanner.db.VideoDbHelper;
-import com.app.scanner.db.VideoVo;
 import com.app.scanner.util.LogUtils;
+import com.app.scanner.vo.AudioVo;
+import com.app.scanner.vo.FolderVo;
 import com.app.scanner.vo.MediaInfoVo;
+import com.app.scanner.vo.StatusInfo;
+import com.app.scanner.vo.VideoVo;
 import com.landmark.scannernative.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,20 +26,9 @@ import static com.app.scanner.util.Constants.ACTION_SCAN_STATUS;
 import static com.app.scanner.util.Constants.ACTION_USB_EXTRA_NAME;
 import static com.app.scanner.util.Constants.ACTION_USB_EXTRA_STATUS;
 import static com.app.scanner.util.Constants.ACTION_USB_EXTRA_STATUS_VALUE;
-import static com.app.scanner.util.LogUtils.getSymbolName;
+import static com.app.scanner.util.Utils.getSymbolName;
 
 
-/**********************************************
- * Filename： UsbDevice
- * Author:   wangyi@zlingsmart.com.cn
- * Description：
- * Date：
- * Version:
- * History:
- *------------------------------------------------------
- * Version  date      author   description
- * V0.0.1           1) …
- ***********************************************/
 public class CarUsbDevice extends BaseDevice {
     private String mScanPath;
     Test test;
@@ -131,16 +119,59 @@ public class CarUsbDevice extends BaseDevice {
                 StatusInfo info = new StatusInfo();
                 info.deviceId = msg.split("#")[0];
                 info.status = Integer.parseInt(msg.split("#")[1]);
+                Intent childIntent = new Intent();
+                childIntent.setAction(ACTION_SCAN_STATUS);
+                childIntent.putExtra(ACTION_USB_EXTRA_NAME, mScanPath);
+                childIntent.putExtra(ACTION_USB_EXTRA_STATUS, info.status);
+                CarApp.contextApp.sendBroadcast(childIntent);
                 if (info.status == 3) {
-                    Intent childIntent = new Intent();
-                    childIntent.setAction(ACTION_SCAN_STATUS);
-                    childIntent.putExtra(ACTION_USB_EXTRA_NAME, mScanPath);
-                    childIntent.putExtra(ACTION_USB_EXTRA_STATUS, info.status);
-                    CarApp.contextApp.sendBroadcast(childIntent);
-
                     LogUtils.debug("stop scan data1");
 //                    test.native_stop(mScanPath);
-                    LogUtils.debug("stop all data2");
+                }
+            }
+
+            @Override
+            public void callBackMediaInfoList(ArrayList<com.landmark.scannernative.MediaInfoVo> list) {
+                for (com.landmark.scannernative.MediaInfoVo item : list) {
+                    notifyToGetData();
+                    if (0 == item.fileType) {
+                        // F_TYPE_DIR = 0,
+                        FolderVo folderVo = new FolderVo();
+                        folderVo.setName(item.fileName);
+                        if (!TextUtils.isEmpty(item.parentPath)) {
+                            folderVo.setParentPath(item.parentPath);
+                        }
+                        folderVo.setPath(item.filePath);
+                        folderVo.setSymbolName(getSymbolName(item.fileName));
+                        folderHelper.insert(folderVo);
+                    } else if (1 == item.fileType) {
+                        //F_TYPE_AUDIO,
+                        AudioVo audioVo = new AudioVo();
+                        audioVo.setPath(item.filePath);
+                        audioVo.setName(item.fileName);
+                        audioVo.setSymbolName(getSymbolName(item.fileName));
+                        audioVo.setSize(item.fileSize + "");
+                        audioVo.setTitle(item.title);
+                        audioVo.setAlbum(item.album);
+                        audioVo.setSinger(item.composer);
+                        audioVo.setGenre(item.genre);
+                        audioVo.setFolder(item.parentPath);
+                        audioVo.setYear(item.year);
+                        audioVo.setDuration(item.duration + "");
+
+                        audioHelper.insert(audioVo);
+
+                    } else if (2 == item.fileType) {
+                        //F_TYPE_VIDEO,
+                        VideoVo videoVo = new VideoVo();
+                        videoVo.setPath(item.filePath);
+                        videoVo.setName(item.fileName);
+                        videoVo.setSymbolName(getSymbolName(item.fileName));
+                        videoVo.setFolder(item.parentPath);
+                        videoVo.setSize(item.fileSize + "");
+
+                        videoHelper.insert(videoVo);
+                    }
                 }
             }
 
@@ -148,7 +179,6 @@ public class CarUsbDevice extends BaseDevice {
     }
 
     public CarUsbDevice build() {
-
         return this;
     }
 
@@ -162,11 +192,12 @@ public class CarUsbDevice extends BaseDevice {
         return mScanPath;
     }
 
-    public void setmScanPath(String mScanPath) {
+    public CarUsbDevice setmScanPath(String mScanPath) {
         this.mScanPath = mScanPath;
+        return this;
     }
 
-    public void scanDevice() {
+    public void startScanDevice() {
         String configPath = DaoManager.getInstance().getDbPath() + "/config.json";
         String deviceId = mScanPath + "";
         String scanPath = mScanPath + "/test1";
@@ -184,8 +215,9 @@ public class CarUsbDevice extends BaseDevice {
         if (count == 10) {
             LogUtils.debug("notifyToGetData");
             Intent childIntent = new Intent();
+            childIntent.setAction(ACTION_SCAN_STATUS);
             childIntent.putExtra(ACTION_USB_EXTRA_STATUS, ACTION_USB_EXTRA_STATUS_VALUE);
-            CarApp.getInstance().sendBroadcast(childIntent);
+            CarApp.contextApp.sendBroadcast(childIntent);
         }
 
     }

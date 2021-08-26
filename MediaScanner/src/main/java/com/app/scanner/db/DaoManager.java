@@ -5,9 +5,14 @@ import android.view.View;
 
 import com.app.scanner.BuildConfig;
 import com.app.scanner.CarApp;
+import com.app.scanner.util.Constants;
+import com.app.scanner.util.LogUtils;
+import com.app.scanner.vo.DaoMaster;
+import com.app.scanner.vo.DaoSession;
+
 import org.greenrobot.greendao.query.QueryBuilder;
 
-import static com.app.scanner.db.Constants.DB_NAME;
+import static com.app.scanner.util.Constants.DB_FOLDER;
 
 /**********************************************
  * Filename： DaoManager
@@ -48,15 +53,13 @@ public class DaoManager {
     private DaoMaster getDaoMaster() {
         if (mDaoMaster == null) {
             boolean sdExist = android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState());
-            if (!sdExist) {//如果不存在,
-                Log.e(Constants.LOG_TAG, "SD卡不存在，请加载SD卡");
-                throw new RuntimeException("SD卡不存在，请加载SD卡");
+            if (!sdExist) {
+                throw new RuntimeException("sd not exit");
             }
-            String dbDir = android.os.Environment.getExternalStorageDirectory().toString()+
-                    "/scannerdb4";
-            dbPath=dbDir;
+            String dbDir = android.os.Environment.getExternalStorageDirectory().toString() + "/" + DB_FOLDER;
+            dbPath = dbDir;
             DatabaseContext context = new DatabaseContext(CarApp.contextApp, dbDir);
-            DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, DB_NAME, null);
+            DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, Constants.DB_NAME, null);
             mDaoMaster = new DaoMaster(helper.getWritableDatabase());
         }
         return mDaoMaster;
@@ -106,7 +109,7 @@ public class DaoManager {
         }
     }
 
-    public void deleteAllData(){
+    public void deleteAllData() {
         DaoManager.getInstance().getDaoSession().getFolderVoDao().deleteAll();
         DaoManager.getInstance().getDaoSession().getAlbumVoDao().deleteAll();
         DaoManager.getInstance().getDaoSession().getAudioVoDao().deleteAll();

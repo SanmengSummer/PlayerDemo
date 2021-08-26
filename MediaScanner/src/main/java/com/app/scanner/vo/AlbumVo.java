@@ -1,12 +1,14 @@
-package com.app.scanner.db;
+package com.app.scanner.vo;
 
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToMany;
 
+
 import java.util.List;
-import org.greenrobot.greendao.annotation.Generated;
+
 import org.greenrobot.greendao.DaoException;
+import org.greenrobot.greendao.annotation.Generated;
 
 /**********************************************
  * Filename： FileVo
@@ -19,21 +21,22 @@ import org.greenrobot.greendao.DaoException;
  * Version  date      author   description
  * V0.0.1        wangyi   1) …
  ***********************************************/
-@Entity(nameInDb = "table_singer")
-public class SingerVo {
+@Entity(nameInDb = "table_album")
+public class AlbumVo {
     @Id(autoincrement = true)
     private Long id;
 
     private String name;
     private String symbolName;
-    @Generated(hash = 264111996)
-    public SingerVo(Long id, String name, String symbolName) {
+
+    @Generated(hash = 89140298)
+    public AlbumVo(Long id, String name, String symbolName) {
         this.id = id;
         this.name = name;
         this.symbolName = symbolName;
     }
-    @Generated(hash = 2035790852)
-    public SingerVo() {
+    @Generated(hash = 1343948380)
+    public AlbumVo() {
     }
     public Long getId() {
         return this.id;
@@ -53,4 +56,6 @@ public class SingerVo {
     public void setSymbolName(String symbolName) {
         this.symbolName = symbolName;
     }
+    
+ 
 }

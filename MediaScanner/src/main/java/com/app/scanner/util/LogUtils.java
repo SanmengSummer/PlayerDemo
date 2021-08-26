@@ -21,7 +21,7 @@ import android.util.Log;
 import com.github.promeg.pinyinhelper.Pinyin;
 
 public class LogUtils {
-    private static final String TAG = "carScanner";
+    public static final String TAG = "carScanner";
 
     public static void debug(String str, String str2) {
         Log.d(TAG, "@" + str + "@: " + str2);
@@ -55,7 +55,4 @@ public class LogUtils {
         Log.w(TAG,  "@: " + str2, th);
     }
 
-    public static String getSymbolName(String name){
-        return Pinyin.toPinyin(name,"");
-    }
 }

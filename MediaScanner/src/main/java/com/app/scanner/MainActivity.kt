@@ -5,10 +5,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
-import com.app.scanner.db.AudioVo
 import com.app.scanner.db.DaoManager
 import com.app.scanner.db.DbOperationHelper
 import com.app.scanner.util.LogUtils
+import com.app.scanner.vo.AudioVo
 
 
 /**********************************************

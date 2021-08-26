@@ -1,28 +1,29 @@
 package com.app.scanner.db;
 
-import android.text.TextUtils;
+import com.app.scanner.util.Utils;
+import com.app.scanner.vo.FolderVo;
+import com.app.scanner.vo.FolderVoDao;
+import com.app.scanner.vo.VideoVo;
+import com.app.scanner.vo.VideoVoDao;
 
 import org.greenrobot.greendao.AbstractDao;
-import org.greenrobot.greendao.Property;
 
 import java.util.List;
 
-import static com.app.scanner.util.LogUtils.getSymbolName;
+import static com.app.scanner.util.Utils.getSymbolName;
 
 public class VideoDbHelper extends DbOperationHelper<VideoVo> {
-    AbstractDao dao;
-    AbstractDao folderDao;
+    private AbstractDao folderDao;
 
     public VideoDbHelper(Class<VideoVo> pEntityClass, AbstractDao<VideoVo, Long> pEntityDao) {
         super(pEntityClass, pEntityDao);
-        dao = pEntityDao;
         folderDao = DaoManager.getInstance().getDaoSession().getFolderVoDao();
     }
 
     @Override
     public boolean insert(VideoVo pEntity) {
 
-        if (!TextUtils.isEmpty(pEntity.getFolder())) {
+        if (!Utils.isEmpty(pEntity.getFolder())) {
             List<FolderVo> list = queryByKey(folderDao, FolderVoDao.Properties.Path, pEntity.getFolder());
             if (list != null && list.size() > 0) {
                 FolderVo folderVo = list.get(0);
@@ -49,7 +50,7 @@ public class VideoDbHelper extends DbOperationHelper<VideoVo> {
 
     @Override
     public VideoVo queryByKey(String key) {
-        List<VideoVo> list = dao.queryBuilder().where(VideoVoDao.Properties.Path.eq(key)).list();
+        List<VideoVo> list = entityDao.queryBuilder().where(VideoVoDao.Properties.Path.eq(key)).list();
         if (list != null && list.size() > 0) {
             return list.get(0);
         }

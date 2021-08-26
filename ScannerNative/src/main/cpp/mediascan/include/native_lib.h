@@ -9,6 +9,8 @@ typedef struct java_callback {
     jclass cls;
     jmethodID midInfo;
     jmethodID midStatus;
+    jmethodID list;
+    jclass media_info_cls;
 } java_callback;
 
 java_callback javaCallback;
@@ -26,7 +28,7 @@ public:
 
     bool attachThreadToJVM(JNIEnv **env);
 
-    stringstream listToString(std::list<MediaInfo::SharePtr> infos);
+    jobject getResult(JNIEnv *env,std::list<MediaInfo::SharePtr> infos);
 
     string jstring2str(JNIEnv *env, jstring jstr);
 

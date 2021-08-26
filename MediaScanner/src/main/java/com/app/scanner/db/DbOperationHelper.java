@@ -1,27 +1,16 @@
 package com.app.scanner.db;
 
+import com.app.scanner.vo.DaoSession;
+
 import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.Property;
-import org.greenrobot.greendao.query.QueryBuilder;
-import org.greenrobot.greendao.query.WhereCondition;
 
 import java.util.List;
 
-/**********************************************
- * Filename： CommonDaoUtils
- * Author:   wangyi@zlingsmart.com.cn
- * Description：
- * Date：
- * Version:
- * History:
- *------------------------------------------------------
- * Version  date      author   description
- * V0.0.1        wangyi   1) …
- ***********************************************/
-public class DbOperationHelper<T> implements INormalOp<T>{
+public class DbOperationHelper<T> implements ISimpleOp<T> {
     private DaoSession mDaoSession;
     private Class<T> entityClass;
-    private AbstractDao<T, Long> entityDao;
+    public AbstractDao<T, Long> entityDao;
 
     public DbOperationHelper(Class<T> pEntityClass, AbstractDao<T, Long> pEntityDao) {
         DaoManager mManager = DaoManager.getInstance();

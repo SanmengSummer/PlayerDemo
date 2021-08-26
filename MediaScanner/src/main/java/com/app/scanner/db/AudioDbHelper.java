@@ -1,23 +1,31 @@
 package com.app.scanner.db;
 
-import android.text.TextUtils;
+import com.app.scanner.util.Utils;
+import com.app.scanner.vo.AlbumVo;
+import com.app.scanner.vo.AlbumVoDao;
+import com.app.scanner.vo.AudioVo;
+import com.app.scanner.vo.AudioVoDao;
+import com.app.scanner.vo.FolderVo;
+import com.app.scanner.vo.FolderVoDao;
+import com.app.scanner.vo.GenreVo;
+import com.app.scanner.vo.GenreVoDao;
+import com.app.scanner.vo.SingerVo;
+import com.app.scanner.vo.SingerVoDao;
 
 import org.greenrobot.greendao.AbstractDao;
 
 import java.util.List;
 
-import static com.app.scanner.util.LogUtils.getSymbolName;
+import static com.app.scanner.util.Utils.getSymbolName;
 
 public class AudioDbHelper extends DbOperationHelper<AudioVo> {
-    AbstractDao dao;
-    AbstractDao albumDao;
-    AbstractDao singerDao;
-    AbstractDao folderDao;
-    AbstractDao genreDao;
+    private AbstractDao albumDao;
+    private AbstractDao singerDao;
+    private AbstractDao folderDao;
+    private AbstractDao genreDao;
 
     public AudioDbHelper(Class<AudioVo> pEntityClass, AbstractDao<AudioVo, Long> pEntityDao) {
         super(pEntityClass, pEntityDao);
-        dao = pEntityDao;
         albumDao = DaoManager.getInstance().getDaoSession().getAlbumVoDao();
         singerDao = DaoManager.getInstance().getDaoSession().getSingerVoDao();
         folderDao = DaoManager.getInstance().getDaoSession().getFolderVoDao();
@@ -27,7 +35,7 @@ public class AudioDbHelper extends DbOperationHelper<AudioVo> {
 
     @Override
     public boolean insert(AudioVo pEntity) {
-        if (!TextUtils.isEmpty(pEntity.getAlbum())) {
+        if (!Utils.isEmpty(pEntity.getAlbum())) {
             List<AlbumVo> list = queryByKey(albumDao, AlbumVoDao.Properties.Name, pEntity.getAlbum());
             if (list != null && list.size() > 0) {
                 AlbumVo albumVo = list.get(0);
@@ -40,7 +48,7 @@ public class AudioDbHelper extends DbOperationHelper<AudioVo> {
                 pEntity.setAlbumId(albumId);
             }
         }
-        if (!TextUtils.isEmpty(pEntity.getSinger())) {
+        if (!Utils.isEmpty(pEntity.getSinger())) {
             List<SingerVo> list = queryByKey(singerDao, SingerVoDao.Properties.Name, pEntity.getSinger());
             if (list != null && list.size() > 0) {
                 SingerVo singerVo = list.get(0);
@@ -54,7 +62,7 @@ public class AudioDbHelper extends DbOperationHelper<AudioVo> {
             }
         }
 
-        if (!TextUtils.isEmpty(pEntity.getFolder())) {
+        if (!Utils.isEmpty(pEntity.getFolder())) {
             List<FolderVo> list = queryByKey(folderDao, FolderVoDao.Properties.Path, pEntity.getFolder());
             if (list != null && list.size() > 0) {
                 FolderVo folderVo = list.get(0);
@@ -69,7 +77,7 @@ public class AudioDbHelper extends DbOperationHelper<AudioVo> {
                 pEntity.setFolderId(folderId);
             }
         }
-        if (!TextUtils.isEmpty(pEntity.getGenre())) {
+        if (!Utils.isEmpty(pEntity.getGenre())) {
             List<GenreVo> list = queryByKey(genreDao, GenreVoDao.Properties.Name, pEntity.getGenre());
             if (list != null && list.size() > 0) {
                 GenreVo genreVo = list.get(0);
@@ -94,7 +102,7 @@ public class AudioDbHelper extends DbOperationHelper<AudioVo> {
 
     @Override
     public AudioVo queryByKey(String key) {
-        List<AudioVo> list = dao.queryBuilder().where(AudioVoDao.Properties.Path.eq(key)).list();
+        List<AudioVo> list = entityDao.queryBuilder().where(AudioVoDao.Properties.Path.eq(key)).list();
         if (list != null && list.size() > 0) {
             return list.get(0);
         }

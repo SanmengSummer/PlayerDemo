@@ -1,4 +1,4 @@
-package com.app.scanner.db;
+package com.app.scanner.vo;
 
 
 /**********************************************

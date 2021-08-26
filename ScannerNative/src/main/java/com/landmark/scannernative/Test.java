@@ -15,14 +15,10 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @ClassName: Test
@@ -36,6 +32,7 @@ public class Test {
     static {
         System.loadLibrary("scanner_jni");
     }
+
     Context mContext;
 
     private static Handler mHandler;
@@ -51,30 +48,45 @@ public class Test {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
-                String info = (String) msg.obj;
+
                 if (msg.what == 0) {
+                    String info = (String) msg.obj;
                     if (callBackAudioInfo != null && !TextUtils.isEmpty(info.trim())) {
                         callBackAudioInfo.callBackAudioInfo(info);
                     }
                 } else if (msg.what == 1) {
+                    String info = (String) msg.obj;
                     if (callBackAudioInfo != null && !TextUtils.isEmpty(info.trim())) {
                         callBackAudioInfo.callBackStatusInfo(info);
+                    }
+                } else if (msg.what == 2) {
+                    ArrayList<MediaInfoVo> list = (ArrayList<MediaInfoVo>) msg.obj;
+                    if (callBackAudioInfo != null) {
+                        callBackAudioInfo.callBackMediaInfoList(list);
                     }
                 }
             }
         };
-
     }
 
     public native void native_init(String deviceId, String configPath, String scanPath);
 
     public native void native_stop(String deviceId);
 
+    public native ArrayList<MediaInfoVo> native_getListMedias();
 
     //java层方法的具体实现
     public void JNICallJava(String msg) {
         Message message = mHandler.obtainMessage();
         message.what = 0;
+        message.obj = msg;
+        mHandler.handleMessage(message);
+    }
+
+    //java层方法的具体实现
+    public void JNICallJavaMediaList(ArrayList<MediaInfoVo> msg) {
+        Message message = mHandler.obtainMessage();
+        message.what = 2;
         message.obj = msg;
         mHandler.handleMessage(message);
     }
@@ -91,6 +103,8 @@ public class Test {
         void callBackAudioInfo(String info);
 
         void callBackStatusInfo(String info);
+
+        void callBackMediaInfoList(ArrayList<MediaInfoVo> msg);
     }
 
 }

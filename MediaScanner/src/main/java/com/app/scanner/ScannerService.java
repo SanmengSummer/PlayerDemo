@@ -25,7 +25,7 @@ import androidx.annotation.Nullable;
 
 import com.app.scanner.db.DaoManager;
 import com.app.scanner.receiver.UsbDiskReceiver;
-import com.app.scanner.util.FileUtils;
+import com.app.scanner.util.Utils;
 
 import static android.content.Intent.ACTION_MEDIA_MOUNTED;
 import static android.content.Intent.ACTION_MEDIA_UNMOUNTED;
@@ -56,7 +56,7 @@ public class ScannerService extends Service {
 
         registerReceiver(mUsbReceiver, usbDeviceStateFilter);
 
-        FileUtils.copyFilesFromRaw(this,R.raw.config,"config.json", DaoManager.getInstance().getDbPath());
+        Utils.copyFilesFromRaw(this,R.raw.config,"config.json", DaoManager.getInstance().getDbPath());
     }
 
 

@@ -4,28 +4,13 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
-import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
 
-import static com.app.scanner.db.Constants.DB_NAME;
 
-/**********************************************
- * Filename： DatabaseContext
- * Author:   wangyi@zlingsmart.com.cn
- * Description：
- * Date：
- * Version:
- * History:
- *------------------------------------------------------
- * Version  date      author   description
- * V0.0.1        wangyi   1) …
- ***********************************************/
 public class DatabaseContext extends ContextWrapper {
     public static String dbPath = "";
-    public static String TAG = "DatabaseContext";
 
     public DatabaseContext(Context base, String dbPath) {
         super(base);

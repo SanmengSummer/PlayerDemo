@@ -1,4 +1,4 @@
-package com.app.scanner;
+package com.app.scanner.device;
 
 public enum DeviceTypeEnum {
     USB_1("usb1", 0,0),

@@ -1,4 +1,4 @@
-package com.app.scanner.db;
+package com.app.scanner.vo;
 
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;

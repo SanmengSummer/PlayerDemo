@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
-import com.app.scanner.DeviceManager;
+import com.app.scanner.device.DeviceManager;
 import com.app.scanner.device.CarUsbDevice;
 import com.app.scanner.util.LogUtils;
 
@@ -15,17 +15,6 @@ import static com.app.scanner.util.Constants.ACTION_USB_EXTRA_NAME;
 import static com.app.scanner.util.Constants.ACTION_USB_MOUNTED;
 import static com.app.scanner.util.Constants.ACTION_USB_UN_MOUNTED;
 
-/**********************************************
- * Filename： UsbDiskReceiver
- * Author:   wangyi@zlingsmart.com.cn
- * Description：
- * Date：
- * Version:
- * History:
- *------------------------------------------------------
- * Version  date      author   description
- * V0.0.1           1) …
- ***********************************************/
 public class UsbDiskReceiver extends BroadcastReceiver {
 
     @Override
@@ -57,8 +46,7 @@ public class UsbDiskReceiver extends BroadcastReceiver {
             LogUtils.debug("插入了usb path:" + mountPath);
             if (tempDevice == null) {
                 tempDevice = (CarUsbDevice) DeviceManager.getInstance(context).createDevice(mountPath);
-                tempDevice.setmScanPath(mountPath);
-                tempDevice.build().scanDevice();
+                tempDevice.setmScanPath(mountPath).startScanDevice();
 
                 Intent childIntent = new Intent();
                 childIntent.setAction(ACTION_USB_MOUNTED);

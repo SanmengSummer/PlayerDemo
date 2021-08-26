@@ -5,7 +5,7 @@ import org.greenrobot.greendao.query.WhereCondition;
 
 import java.util.List;
 
-public interface INormalOp<T> {
+public interface ISimpleOp<T> {
 
     /**
      * 插入记录，如果表未创建，先创建表
@@ -46,7 +46,6 @@ public interface INormalOp<T> {
      * 根据主键id查询记录
      */
     public T queryById(long key);
-
 
     /**
      * 根据主键id查询记录

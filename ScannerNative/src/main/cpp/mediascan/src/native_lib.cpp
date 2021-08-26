@@ -29,41 +29,28 @@ ListenerImpl::onFileInfoList(std::string deviceId, std::list<MediaInfo::SharePtr
     jboolean jboolean1 = attachThreadToJVM(&env);
 
     jclass cls = javaCallback.cls;
+    jmethodID mid = javaCallback.list;
 
-//2.获取方法id
-//clazz 类的字节码  name java方法名称  sig java方法签名
-//    jmethodID mid = env->GetMethodID(cls, "JNICallJava", "(Ljava/lang/String;)V");
-    jmethodID mid = javaCallback.midInfo;
 
-//3.实例化该类
-    jobject jobject = env->AllocObject(cls);
+    jobject resultList = getResult(env, infos);
+    jobject resultObj = env->AllocObject(cls);
+    env->CallVoidMethod(resultObj, mid, resultList);
 
-//5.设置java层参数的值
-    jstring str = env->NewStringUTF(listToString(infos).str().c_str());
-    env->CallVoidMethod(jobject, mid, str);
+    env->DeleteLocalRef(resultList);
+    env->DeleteLocalRef(resultObj);
 
-//删除引用
-    env->DeleteLocalRef(str);
-
-    env->DeleteLocalRef(jobject);
-//         env->DeleteGlobalRef(cls);
 }
 
 void ListenerImpl::onEvent(std::string deviceId, int event) {
-    LOGD("deviceId:%s,event:%d", deviceId.c_str(), event);
     JNIEnv *env;
     jboolean jboolean1 = attachThreadToJVM(&env);
 
     jclass cls = javaCallback.cls;
 
-//2.获取方法id
-//clazz 类的字节码  name java方法名称  sig java方法签名
     jmethodID mid = javaCallback.midStatus;
 
-//3.实例化该类
     jobject jobject = env->AllocObject(cls);
 
-//5.设置java层参数的值
 
     std::string str1 = deviceId;
     std::string str2 = std::to_string(event);
@@ -76,7 +63,6 @@ void ListenerImpl::onEvent(std::string deviceId, int event) {
     env->DeleteLocalRef(str);
 
     env->DeleteLocalRef(jobject);
-//         env->DeleteGlobalRef(cls);
 }
 
 bool ListenerImpl::attachThreadToJVM(JNIEnv **env) {
@@ -99,21 +85,56 @@ bool ListenerImpl::attachThreadToJVM(JNIEnv **env) {
 }
 
 
-stringstream ListenerImpl::listToString(std::list<MediaInfo::SharePtr> infos) {
-    stringstream result;
+jobject ListenerImpl::getResult(JNIEnv *env, std::list<MediaInfo::SharePtr> infos) {
+    jclass list_cls = env->FindClass("java/util/ArrayList");
+    jmethodID list_costruct = env->GetMethodID(list_cls, "<init>", "()V");
+    jobject list_obj = env->NewObject(list_cls, list_costruct);
+
+    jmethodID list_add = env->GetMethodID(list_cls, "add", "(Ljava/lang/Object;)Z");
+
+    jclass media_info_cls = javaCallback.media_info_cls;
+
+    jmethodID media_info_construct = env->GetMethodID(media_info_cls, "<init>", "()V");
+
+    jfieldID filePath = env->GetFieldID(media_info_cls, "filePath", "Ljava/lang/String;");
+    jfieldID fileName = env->GetFieldID(media_info_cls, "fileName", "Ljava/lang/String;");
+    jfieldID parentPath = env->GetFieldID(media_info_cls, "parentPath", "Ljava/lang/String;");
+    jfieldID composer = env->GetFieldID(media_info_cls, "composer", "Ljava/lang/String;");
+    jfieldID genre = env->GetFieldID(media_info_cls, "genre", "Ljava/lang/String;");
+    jfieldID year = env->GetFieldID(media_info_cls, "year", "Ljava/lang/String;");
+    jfieldID album = env->GetFieldID(media_info_cls, "album", "Ljava/lang/String;");
+    jfieldID title = env->GetFieldID(media_info_cls, "title", "Ljava/lang/String;");
+    jfieldID artist = env->GetFieldID(media_info_cls, "artist", "Ljava/lang/String;");
+    jfieldID fileSize = env->GetFieldID(media_info_cls, "fileSize", "J");
+    jfieldID fileModTime = env->GetFieldID(media_info_cls, "fileModTime", "J");
+    jfieldID fileChangeTime = env->GetFieldID(media_info_cls, "fileChangeTime", "J");
+    jfieldID fileType = env->GetFieldID(media_info_cls, "fileType", "I");
+    jfieldID duration = env->GetFieldID(media_info_cls, "duration", "J");
+
     for (auto item : infos) {
+        jobject stu_obj = env->NewObject(media_info_cls, media_info_construct);  //构造一个对象
         if (item->mFileType == MediaInfo::F_TYPE_AUDIO) {
             std::shared_ptr<MediaInfo> info = item;
-            result << *info;
-            result << "@@";
-        } else {
-            std::shared_ptr<FileInfo> info = item;
-            result << *info;
-            result << "@@";
+            env->SetObjectField(stu_obj, title, env->NewStringUTF(info->mTitle.c_str()));
+            env->SetObjectField(stu_obj, artist, env->NewStringUTF(info->mArtist.c_str()));
+            env->SetObjectField(stu_obj, album, env->NewStringUTF(info->mAlbum.c_str()));
+            env->SetObjectField(stu_obj, composer, env->NewStringUTF(info->mComposer.c_str()));
+            env->SetObjectField(stu_obj, genre, env->NewStringUTF(info->mGenre.c_str()));
+            env->SetObjectField(stu_obj, year, env->NewStringUTF(info->mYear.c_str()));
+            env->SetLongField(stu_obj, duration, info->mDuration);
         }
+        env->SetObjectField(stu_obj, filePath, env->NewStringUTF(item->mFilePath.c_str()));
+        env->SetObjectField(stu_obj, fileName, env->NewStringUTF(item->mFileName.c_str()));
+        env->SetObjectField(stu_obj, parentPath, env->NewStringUTF(item->mParentPath.c_str()));
+        env->SetLongField(stu_obj, fileSize, item->mFileSize);
+        env->SetLongField(stu_obj, fileModTime, item->mFileModTime);
+        env->SetLongField(stu_obj, fileChangeTime, item->mFileChangeTime);
+        env->SetIntField(stu_obj, fileType, item->mFileType);
 
+        env->CallBooleanMethod(list_obj, list_add, stu_obj); //执行Arraylist类实例的add方法，添加一个对象
     }
-    return result;
+
+    return list_obj;
 }
 
 string ListenerImpl::jstring2str(JNIEnv *env, jstring jstr) {
@@ -150,9 +171,17 @@ Java_com_landmark_scannernative_Test_native_1init(JNIEnv *env, jobject thiz, jst
                                                   jstring config_path, jstring scan_path) {
     jclass cls = env->FindClass("com/landmark/scannernative/Test");
     javaCallback.cls = static_cast<jclass>(env->NewGlobalRef(cls));
-    javaCallback.midInfo = static_cast<jmethodID>(env->GetMethodID(cls, "JNICallJava", "(Ljava/lang/String;)V"));
-    javaCallback.midStatus = static_cast<jmethodID>(env->GetMethodID(cls, "JNICallJavaStatus", "(Ljava/lang/String;)V"));
+    javaCallback.midInfo = static_cast<jmethodID>(env->GetMethodID(cls, "JNICallJava",
+                                                                   "(Ljava/lang/String;)V"));
+    javaCallback.midStatus = static_cast<jmethodID>(env->GetMethodID(cls, "JNICallJavaStatus",
+                                                                     "(Ljava/lang/String;)V"));
 
+
+    javaCallback.list = static_cast<jmethodID>(env->GetMethodID(cls, "JNICallJavaMediaList",
+                                                                "(Ljava/util/ArrayList;)V"));
+
+    jclass mediaClass = env->FindClass("com/landmark/scannernative/MediaInfoVo");
+    javaCallback.media_info_cls = static_cast<jclass>(env->NewGlobalRef(mediaClass));
 
     manager->setMediaScannerManagerListener(listener);
     manager->setConfigPath(listener->jstring2str(env, config_path));

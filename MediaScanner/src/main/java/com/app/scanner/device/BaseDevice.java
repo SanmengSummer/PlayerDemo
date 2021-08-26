@@ -1,10 +1,8 @@
-package com.app.scanner;
+package com.app.scanner.device;
 
-import android.os.AsyncTask;
 import com.app.scanner.vo.MediaInfoVo;
 import com.app.scanner.vo.MediaTagEnum;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -23,7 +21,7 @@ import java.util.concurrent.FutureTask;
  ***********************************************/
 public abstract class BaseDevice {
 
-    private final int PAGE_NUM = 30;
+    private final int PAGE_NUM = 10;
 
     //是否正在使用
     public boolean isConnect = false;
