@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.landmark.media.R;
 import com.landmark.media.application.MediaApplication;
 import com.landmark.media.common.MetadataTypeValue;
+import com.landmark.media.controller.utils.PlayerUtils;
 import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.db.data.MediaIDHelper;
 import com.landmark.media.demo.adapter.SearchAdapter;
@@ -636,6 +637,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
      */
     public void setData(MediaData model, int position) {
         //todo 点击后的事件
+        PlayerUtils.startPlayer(this, model, position);
         LogUtils.debug(TAG, " MODEL: " + model.toString());
         model.getData().forEach(new Consumer<MediaDataModel>() {
             @Override

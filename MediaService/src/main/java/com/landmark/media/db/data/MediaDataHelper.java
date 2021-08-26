@@ -43,7 +43,7 @@ public class MediaDataHelper implements IDataProvider {
     /**
      * devices connect status
      */
-    private static boolean isDevicesStatus = false;
+    private static boolean isDevicesStatus = true;
 
     private DeviceBroadcastReceiver mDeviceBroadcastReceiver;
     private IDeviceListener mListener;

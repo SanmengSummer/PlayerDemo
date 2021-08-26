@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.landmark.media.R;
 import com.landmark.media.common.MetadataTypeValue;
+import com.landmark.media.controller.utils.PlayerUtils;
 import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.demo.adapter.SearchAdapter;
 import com.landmark.media.demo.common.Constants;
@@ -53,13 +54,13 @@ public class CollectHistoryActivity extends AppCompatActivity {
     private LinearLayout mllShowpager;
     private TextView mTotal_num;
     private RelativeLayout mRl;
-    private CollectHistoryActivity.MyHandler mHandler;
+    private MyHandler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collect_history);
-        mHandler = new CollectHistoryActivity.MyHandler(this);
+        mHandler = new MyHandler(this);
         mInstance = MediaDataHelper.getInstance(this);
         mCurrent_pager = findViewById(R.id.current_pager);
         mTotal_pager = findViewById(R.id.total_pager);
@@ -244,6 +245,8 @@ public class CollectHistoryActivity extends AppCompatActivity {
      */
     public void setData(MediaData model, int position) {
         //todo 收藏历史点击后的事件
+
+        PlayerUtils.startPlayer(this,model,position);
         LogUtils.debug(TAG, " MODEL: " + model.toString());
         model.getData().forEach(new Consumer<MediaDataModel>() {
             @Override

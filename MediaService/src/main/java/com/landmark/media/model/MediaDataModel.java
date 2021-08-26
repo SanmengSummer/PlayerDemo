@@ -1,5 +1,6 @@
 package com.landmark.media.model;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -46,6 +47,7 @@ public class MediaDataModel implements Parcelable {
     private GenreVo genreVo; //流派
     private Long recordId;
     private RecordVo recordVo; //历史记录
+    private Bitmap icon; //新加 icon
 
 
     protected MediaDataModel(Parcel in) {
@@ -93,6 +95,67 @@ public class MediaDataModel implements Parcelable {
             recordId = in.readLong();
         }
         recordVo = in.readParcelable(RecordVo.class.getClassLoader());
+        icon = in.readParcelable(Bitmap.class.getClassLoader());
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (id == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(id);
+        }
+        dest.writeString(name);
+        dest.writeString(symbolName);
+        dest.writeString(path);
+        dest.writeString(size);
+        dest.writeString(duration);
+        dest.writeString(year);
+        dest.writeByte((byte) (favFlag ? 1 : 0));
+        if (albumId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(albumId);
+        }
+        dest.writeParcelable(albumVo, flags);
+        if (folderId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(folderId);
+        }
+        dest.writeParcelable(folderVo, flags);
+        if (singerId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(singerId);
+        }
+        dest.writeParcelable(singerVo, flags);
+        dest.writeString(suffix);
+        dest.writeString(itemType);
+        if (GenreId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(GenreId);
+        }
+        dest.writeParcelable(genreVo, flags);
+        if (recordId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(recordId);
+        }
+        dest.writeParcelable(recordVo, flags);
+        dest.writeParcelable(icon, flags);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<MediaDataModel> CREATOR = new Creator<MediaDataModel>() {
@@ -277,6 +340,13 @@ public class MediaDataModel implements Parcelable {
         this.singerVo = singerVo;
     }
 
+    public Bitmap getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Bitmap icon) {
+        this.icon = icon;
+    }
 
     @Override
     public String toString() {
@@ -304,62 +374,4 @@ public class MediaDataModel implements Parcelable {
                 '}';
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        if (id == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(id);
-        }
-        dest.writeString(name);
-        dest.writeString(symbolName);
-        dest.writeString(path);
-        dest.writeString(size);
-        dest.writeString(duration);
-        dest.writeString(year);
-        dest.writeByte((byte) (favFlag ? 1 : 0));
-        if (albumId == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(albumId);
-        }
-        dest.writeParcelable(albumVo, flags);
-        if (folderId == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(folderId);
-        }
-        dest.writeParcelable(folderVo, flags);
-        if (singerId == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(singerId);
-        }
-        dest.writeParcelable(singerVo, flags);
-        dest.writeString(suffix);
-        dest.writeString(itemType);
-        if (GenreId == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(GenreId);
-        }
-        dest.writeParcelable(genreVo, flags);
-        if (recordId == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(recordId);
-        }
-        dest.writeParcelable(recordVo, flags);
-    }
 }

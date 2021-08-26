@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.landmark.media.R;
 import com.landmark.media.common.MetadataTypeValue;
+import com.landmark.media.controller.utils.PlayerUtils;
 import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.db.data.MediaIDHelper;
 import com.landmark.media.demo.adapter.SearchAdapter;
@@ -59,7 +60,7 @@ public class HomeActivity extends AppCompatActivity {
     //展示的条数
     int mSearchListSize = Constants.mMusicSize;
     private LinearLayout mllShowpager;
-    private HomeActivity.MyHandler mHandler;
+    private MyHandler mHandler;
     private RelativeLayout mRl;
 
 
@@ -72,7 +73,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        mHandler = new HomeActivity.MyHandler(this);
+        mHandler = new MyHandler(this);
         mInstance = MediaDataHelper.getInstance(this);
         mCurrent_pager = findViewById(R.id.current_pager);
         mTotal_pager = findViewById(R.id.total_pager);
@@ -89,8 +90,8 @@ public class HomeActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mSearchAdapter);
         name_search(null);
 
-        androidx.appcompat.app.ActionBar supportActionBar = getSupportActionBar();
-        supportActionBar.setTitle("首页");
+//        androidx.appcompat.app.ActionBar supportActionBar = getSupportActionBar();
+//        supportActionBar.setTitle("首页");
         mInstance.registerDeviceListener(new IDeviceListener() {
             @Override
             public void onDeviceStatus(boolean status, int actionUsbExtraStatusValue) {
@@ -408,6 +409,8 @@ public class HomeActivity extends AppCompatActivity {
      */
     public void setData(MediaData model, int position) {
         //todo home点击后的事件
+
+        PlayerUtils.startPlayer(this, model, position);
         LogUtils.debug(TAG, " MODEL: " + model.toString());
         model.getData().forEach(new Consumer<MediaDataModel>() {
             @Override
