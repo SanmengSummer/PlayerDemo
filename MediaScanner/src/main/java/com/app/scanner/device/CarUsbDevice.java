@@ -15,7 +15,7 @@ import com.app.scanner.vo.FolderVo;
 import com.app.scanner.vo.MediaInfoVo;
 import com.app.scanner.vo.StatusInfo;
 import com.app.scanner.vo.VideoVo;
-import com.landmark.scannernative.Test;
+import com.landmark.scannernative.ScannerJni;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import static com.app.scanner.util.Utils.getSymbolName;
 
 public class CarUsbDevice extends BaseDevice {
     private String mScanPath;
-    Test test;
+    ScannerJni scannerJni;
     private int count = 0;
 
     public CarUsbDevice(DeviceTypeEnum typeEnum) {
@@ -50,7 +50,7 @@ public class CarUsbDevice extends BaseDevice {
                 VideoVo.class,
                 DaoManager.getInstance().getDaoSession().getVideoVoDao()
         );
-        test = new Test(CarApp.contextApp, new Test.CallBackAudioInfo() {
+        scannerJni = new ScannerJni(CarApp.contextApp, new ScannerJni.CallBackAudioInfo() {
             @Override
             public void callBackAudioInfo(String msg) {
                 if (!TextUtils.isEmpty(msg.trim())) {
@@ -201,13 +201,13 @@ public class CarUsbDevice extends BaseDevice {
         String configPath = DaoManager.getInstance().getDbPath() + "/config.json";
         String deviceId = mScanPath + "";
         String scanPath = mScanPath + "/test1";
-        test.native_init(deviceId, configPath, scanPath);
+        scannerJni.native_init(deviceId, configPath, scanPath);
     }
 
     public void release() {
         LogUtils.debug("clear all data");
         DaoManager.getInstance().deleteAllData();
-        test.native_stop(mScanPath);
+        scannerJni.native_stop(mScanPath);
     }
 
     private void notifyToGetData() {

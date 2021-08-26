@@ -26,7 +26,7 @@ import java.util.ArrayList;
  * @Author: gaby
  * @Date: 8/13/21 4:33 PM
  */
-public class Test {
+public class ScannerJni {
     private static CallBackAudioInfo callBackAudioInfo;
 
     static {
@@ -39,7 +39,7 @@ public class Test {
 
     private static HandlerThread mHandlerThread;
 
-    public Test(Context context, CallBackAudioInfo callBack) {
+    public ScannerJni(Context context, CallBackAudioInfo callBack) {
         this.callBackAudioInfo = callBack;
         this.mContext = context;
         mHandlerThread = new HandlerThread("media_scanner_thread");
