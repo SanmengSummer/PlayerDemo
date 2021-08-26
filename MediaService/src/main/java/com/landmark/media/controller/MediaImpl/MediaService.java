@@ -1,13 +1,11 @@
 package com.landmark.media.controller.MediaImpl;
 
 import static com.landmark.media.controller.MediaConfig.*;
-import static com.landmark.media.controller.utils.MediaIdUtils.*;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
-import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,7 +17,6 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
 import android.view.Surface;
 import android.widget.Toast;
 
@@ -31,7 +28,6 @@ import com.landmark.media.controller.QueueManager;
 import com.landmark.media.controller.utils.LogUtils;
 import com.landmark.media.controller.utils.LrcProcess;
 import com.landmark.media.controller.utils.MP3ID3v2.MetaInfoParser_MP3;
-import com.landmark.media.controller.utils.MediaIdUtils;
 import com.landmark.media.controller.utils.UriToPathUtil;
 import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.db.data.MediaIDHelper;
@@ -39,12 +35,11 @@ import com.landmark.media.db.data.MediaIDHelper;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Author: chenhuaxia
  * Description: The Service of MediaPlayer, extend MediaBrowserServiceCompat compile MediaSession frame.
- * Date: 2021/7/20 15:55
+ * Date: 2021/8/12 15:55
  **/
 @SuppressLint("NewApi")
 public class MediaService extends MediaBrowserServiceCompat implements PlayerStateImpl {
@@ -272,7 +267,7 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
         @Override
         public void onRewind() {
             super.onRewind();
-            LogUtils.debug("MediaSessionCompat  onRewind: ");
+            LogUtils.debug("MediaSessionCompat  onRewind: " + mPlaybackState.getPosition());
             long position = mPlaybackState.getPosition();
             long rewindPosition = position - distance <= 0 ? 0 : position - distance;
             onSeekTo(rewindPosition);
@@ -381,6 +376,21 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
         }
     };
 
+    @Override
+    public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, Bundle rootHints) {
+        return new BrowserRoot(MediaIDHelper.MEDIA_ID_ROOT, null);
+    }
+
+    @Override
+    public void onLoadChildren(@NonNull String parentMediaId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
+        result.detach();
+        List<MediaBrowserCompat.MediaItem> mediaItems = QueueManager.getData();
+        mCurrentIndex = QueueManager.mInitPosition;
+        currentMediaId = mediaItems.get(mCurrentIndex).getMediaId();
+        result.sendResult(mediaItems);
+    }
+
+
     private void currentIndexBack() {
         Bundle bundle = new Bundle();
         bundle.putInt(CUSTOMS_ACTION_RETURN_CURRENT_INDEX, mCurrentIndex);
@@ -399,21 +409,6 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
         return mCurrentIndex;
     }
 
-    @Override
-    public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, Bundle rootHints) {
-        return new BrowserRoot(MEDIA_ID_ROOT, null);
-    }
-
-    @Override
-    public void onLoadChildren(@NonNull String parentMediaId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
-        result.detach();
-        List<MediaBrowserCompat.MediaItem> mediaItems = QueueManager.getData();
-        mCurrentIndex = QueueManager.mInitPosition;
-        currentMediaId = mediaItems.get(mCurrentIndex).getMediaId();
-        result.sendResult(mediaItems);
-    }
-
-
     private void initState() {
         Bundle bundle = new Bundle();
         bundle.putLong(STATE_DURATION, 0);
@@ -422,7 +417,6 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
                 .setExtras(bundle)
                 .build();
         mSession.setPlaybackState(mPlaybackState);
-
     }
 
     private void buildState(int state) {
@@ -468,7 +462,7 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
     }
 
     private void buildStateError(int what, int extra) {
-        long position = mPlaybackState == null ? 0 : mPlaybackState.getPosition();
+        long position = mPlaybackState == null ? 0 : mPlayerAdapter.getCurrentPosition();
         long duration = mPlayerAdapter == null ? 0 : mPlayerAdapter.getDuration();
         Bundle bundle = new Bundle();
         bundle.putLong(STATE_DURATION, duration);
@@ -485,7 +479,7 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
         Bundle bundle = new Bundle();
         LrcProcess lrcProcess = new LrcProcess();
         LrcProcess.LrcContent mLrcContent = new LrcProcess.LrcContent();
-        long currentPosition = mPlaybackState.getPosition();
+        long currentPosition = mPlayerAdapter.getCurrentPosition();
         String lrc = null;
         try {
             MetaInfoParser_MP3 metaInfoParser_mp3 = new MetaInfoParser_MP3();
@@ -545,7 +539,8 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
             if (msg.what == HANDLER_CURRENT_INFO) {
                 if (hasGetLrcAction) {
                     mHandler.sendEmptyMessageDelayed(HANDLER_CURRENT_INFO, handlerDelayMills);
-                    getLrcContent();
+                    if (mPlaybackState.getState() == PlaybackStateCompat.STATE_PLAYING)
+                        getLrcContent();
                 }
             }
         }
@@ -590,7 +585,7 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
     public boolean onError(MediaPlayer mp, int what, int extra) {
         buildStateError(what, extra);
         LogUtils.error("(MediaPlayer:" + mp + ", " + "what:" + what + "extra:" + extra + " )");
-        Toast.makeText(this, "该歌曲无法播放！", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "The song cannot be played！", Toast.LENGTH_SHORT).show();
         return false;
     }
 }

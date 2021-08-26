@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 /**
  * Author: chenhuaxia
- * Description:
+ * Description: MediaInfoBean ,use for get media info by res tag.
  * Date: 2021/8/13 16:58
  **/
 public class MediaInfoBean {

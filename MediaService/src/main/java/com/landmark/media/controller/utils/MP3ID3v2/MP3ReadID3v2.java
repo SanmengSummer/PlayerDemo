@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 public class MP3ReadID3v2 {
     private InputStream mp3ips;
     //        public Charset charset =  Charset.forName("GB18030");
-    public Charset charset = StandardCharsets.UTF_16LE;
+    public Charset charset = StandardCharsets.UTF_16;
     private Id3v2Info info;
 
     public MP3ReadID3v2(File file) {

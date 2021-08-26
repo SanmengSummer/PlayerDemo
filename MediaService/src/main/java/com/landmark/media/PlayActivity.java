@@ -22,8 +22,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.landmark.media.controller.MediaImpl.MediaPlayerManager;
 import com.landmark.media.controller.utils.LogUtils;
 import com.landmark.media.controller.utils.LrcProcess;
-import com.landmark.media.controller.utils.MediaIdUtils;
 import com.landmark.media.controller.utils.PlayerUtils;
+import com.landmark.media.db.data.MediaIDHelper;
 import com.landmark.media.model.MediaData;
 import com.landmark.media.model.MediaDataModel;
 
@@ -39,6 +39,7 @@ public class PlayActivity extends AppCompatActivity {
     private ImageView imageView;
     private TextView textView;
     private int initIndex;
+    private static int playMode = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,9 +79,9 @@ public class PlayActivity extends AppCompatActivity {
         initIndex = getIntent().getIntExtra(PlayerUtils.PLAYER_FOR_INDEX, 0);
         requestPermissions(101);
         instance = MediaPlayerManager.getInstance();
-        instance.setData(this, initIndex);
+        instance.setData(initIndex);
         initView();
-        instance.connectMediaSession(this, MediaIdUtils.MEDIA_ID_ROOT);
+        instance.connectMediaSession(this, MediaIDHelper.MEDIA_ID_ROOT);
         instance.setOnRegisterSessionCallback(list -> {
             mediaItemList = (ArrayList<MediaBrowserCompat.MediaItem>) list;
             SurfaceView surfaceView = findViewById(R.id.surfaceView);
@@ -89,6 +90,8 @@ public class PlayActivity extends AppCompatActivity {
                 @Override
                 public void getMediaListDataChangeCallback(long currentPosition, LrcProcess.LrcContent mLrcContent) {
                     updateSeekBar();
+                    Log.e("mLrcContent", ": " + mLrcContent.getLrc());
+                    Log.e("mLrcContent", ": " + mLrcContent.getLrc_time());
                     if (mLrcContent != null && !mLrcContent.getLrc_time().equals(-1))
                         textTitle.setText(mLrcContent.getLrc());
                     else textTitle.setText("");
@@ -112,6 +115,47 @@ public class PlayActivity extends AppCompatActivity {
         });
     }
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        instance.connect();
+        setPlayMode(btnPlayMode);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        instance.disconnect();
+    }
+
+    SeekBar.OnSeekBarChangeListener onSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            LogUtils.debug("MediaSessionCompat  onStopTrackingTouch: ");
+            PlaybackStateCompat playbackState = instance.getPlaybackState();
+            if (playbackState == null || playbackState.getState() == PlaybackStateCompat.STATE_STOPPED) {
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList(MEDIA_PLAYER_LIST, mediaItemList);
+                instance.getTransportControls().playFromSearch(MEDIA_PLAYER_LIST, bundle);
+            }
+            assert playbackState != null;
+            Bundle extras = playbackState.getExtras();
+            assert extras != null;
+            long duration = extras.getLong(STATE_DURATION);
+            long position = seekBar.getProgress() * duration / 100;
+            instance.getTransportControls().seekTo(position);
+        }
+    };
+
     public void start(View view) {
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList(MEDIA_PLAYER_LIST, mediaItemList);
@@ -129,7 +173,6 @@ public class PlayActivity extends AppCompatActivity {
         instance.getTransportControls().stop();
     }
 
-    private static int playMode = 0;
 
     public void play_mode(View v) {
         playMode++;
@@ -177,46 +220,6 @@ public class PlayActivity extends AppCompatActivity {
         long p = duration == 0 ? 0 : position * 100 / duration;
         mSeek.setProgress((int) p);
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        instance.connect();
-        setPlayMode(btnPlayMode);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        instance.disconnect();
-    }
-
-    SeekBar.OnSeekBarChangeListener onSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-            LogUtils.debug("MediaSessionCompat  onStopTrackingTouch: ");
-            PlaybackStateCompat playbackState = instance.getPlaybackState();
-            if (playbackState == null || playbackState.getState() == PlaybackStateCompat.STATE_STOPPED) {
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList(MEDIA_PLAYER_LIST, mediaItemList);
-                instance.getTransportControls().playFromSearch(MEDIA_PLAYER_LIST, bundle);
-            }
-            assert playbackState != null;
-            Bundle extras = playbackState.getExtras();
-            assert extras != null;
-            long duration = extras.getLong(STATE_DURATION);
-            long position = seekBar.getProgress() * duration / 100;
-            instance.getTransportControls().seekTo(position);
-        }
-    };
 
     public void skipNext(View view) {
         instance.getTransportControls().skipToNext();

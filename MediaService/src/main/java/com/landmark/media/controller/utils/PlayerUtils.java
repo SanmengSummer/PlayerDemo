@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.Bundle;
 
 import com.landmark.media.PlayActivity;
 import com.landmark.media.R;
@@ -16,14 +15,11 @@ import com.landmark.media.db.table.AlbumVo;
 import com.landmark.media.db.table.GenreVo;
 import com.landmark.media.db.table.SingerVo;
 import com.landmark.media.model.MediaData;
-import com.landmark.media.model.MediaDataModel;
-
-import java.util.function.Consumer;
 
 /**
  * Author: chenhuaxia
  * Description: Player utils(Intent to PlayerActivity)
- * Date: 2021/8/25 15:33
+ * Date: 2021/8/18 15:33
  **/
 public class PlayerUtils {
     public final static String PLAYER_FOR_INDEX = "player_for_index";

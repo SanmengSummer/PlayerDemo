@@ -10,8 +10,14 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
+
 import java.io.File;
 
+/**
+ * Author: chenhuaxia
+ * Description: Uri {@link Uri} <-> Path {@link String}  utils
+ * Date: 2021/8/5 15:33
+ **/
 public class UriToPathUtil {
     public static String getRealFilePath(Context context, final Uri uri) {
         if (null == uri)

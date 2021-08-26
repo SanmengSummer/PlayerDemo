@@ -18,7 +18,7 @@ import java.io.IOException;
  * Author: chenhuaxia
  * Description: The adapter of player on MediaPlayer ,
  * you can replace a new player (exoplayer,ijkplayer,vitamio ...) on this.
- * Date: 2021/7/16 9:53
+ * Date: 2021/8/16 9:53
  **/
 @SuppressLint("NewApi")
 public class PlayerAdapter {

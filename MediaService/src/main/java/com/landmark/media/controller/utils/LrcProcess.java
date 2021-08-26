@@ -11,13 +11,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Author: chenhuaxia
  * Description:Lrc parsed into String
- * Date: 2021/8/5 13:49
+ * Date: 2021/8/19 13:49
  **/
 public class LrcProcess {
 
@@ -29,7 +29,7 @@ public class LrcProcess {
     }
 
     private void timeSort() {
-        Collections.sort(LrcList, (o1, o2) -> o1.getLrc_time().compareTo(o2.getLrc_time()));
+        LrcList.sort(Comparator.comparing(LrcContent::getLrc_time));
     }
 
     /**

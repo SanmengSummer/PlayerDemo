@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Author: chenhuaxia
  * Description: The manager of MediaPlayer, you can use player by this manager,etc connect,listener,controller.
- * Date: 2021/7/15 15:55
+ * Date: 2021/8/15 15:55
  **/
 public class MediaPlayerManager {
     public static final int random = PlaybackStateCompat.SHUFFLE_MODE_NONE;
@@ -45,11 +45,14 @@ public class MediaPlayerManager {
     private MediaControllerCompat mController;
     private MediaBrowserCompat.SubscriptionCallback mBrowserSubscriptionCallback;
     private MediaControllerCompat.Callback mControllerCallback;
+    private MediaListDataChangeCallback mMediaListDataChangeCallback;
+    private MediaControllerCompat.TransportControls transportControls;
     private Context mContext;
     private String mMediaId;
     private List<MediaBrowserCompat.MediaItem> mMediaItemList;
     private static int mCurrentIndex = 0;
     private static int mMode = order;
+    private static int previousIndex = mCurrentIndex;
 
     /**
      * Author: chenhuaxia
@@ -96,6 +99,16 @@ public class MediaPlayerManager {
         initConnect(context, mediaId);
     }
 
+    /**
+     * Author: chenhuaxia
+     * Description:Connect MediaSession.
+     *
+     * @param context                      (Context  for Activity/Service/Application )For initConnect
+     * @param iBrowserSubscriptionCallback (Replace of MediaControllerCompat.Callback)
+     * @param iControllerCallback          (Replace of  MediaBrowserCompat.SubscriptionCallback)
+     * @param mediaId                      (Media Id for find out data of media)For initConnect
+     *                                     Date: 2021/8/25 14:54
+     **/
     public void connectMediaSession(Context context,
                                     MediaBrowserCompat.SubscriptionCallback iBrowserSubscriptionCallback,
                                     MediaControllerCompat.Callback iControllerCallback,
@@ -105,6 +118,14 @@ public class MediaPlayerManager {
         initConnect(context, mediaId);
     }
 
+    /**
+     * Author: chenhuaxia
+     * Description:Create MediaBrowserCompat ,init mediaId and context.
+     *
+     * @param context Context  for Activity/Service/Application
+     * @param mediaId Media Id for find out data of media
+     *                Date: 2021/8/25 14:54
+     **/
     private void initConnect(Context context, String mediaId) {
         mContext = context;
         mMediaId = mediaId;
@@ -113,6 +134,13 @@ public class MediaPlayerManager {
                 BrowserConnectionCallback, null);
     }
 
+    /**
+     * Author: chenhuaxia
+     * Description:Set SurfaceView in MediaPlayer.
+     *
+     * @param surfaceView SurfaceView
+     *                    Date: 2021/8/25 14:54
+     **/
     public void setSurfaceView(SurfaceView surfaceView) {
         if (mController == null || null == surfaceView) return;
         Bundle bundle = new Bundle();
@@ -126,24 +154,54 @@ public class MediaPlayerManager {
         getTransportControls().sendCustomAction(CUSTOMS_ACTION_SET_SURFACE, bundle);
     }
 
-    private MediaControllerCompat.TransportControls transportControls = null;
-
+    /**
+     * Author: chenhuaxia
+     * Description:Get transportControls from MediaControllerCompat. It may be null,be careful of NullPointerException
+     *
+     * @return MediaControllerCompat.TransportControls
+     * Date: 2021/8/25 14:54
+     **/
     public MediaControllerCompat.TransportControls getTransportControls() {
         if (null != mController && transportControls == null)
             transportControls = mController.getTransportControls();
         return transportControls;
     }
 
+    /**
+     * Author: chenhuaxia
+     * Description:Get PlaybackState from MediaControllerCompat.TransportControls . It may be null,be careful of NullPointerException
+     *
+     * @return PlaybackStateCompat
+     * Date: 2021/8/25 14:54
+     **/
     public PlaybackStateCompat getPlaybackState() {
         if (null != mController)
             return mController.getPlaybackState();
         return null;
     }
 
+    /**
+     * Author: chenhuaxia
+     * Description:Listen RegisterSessionCallback .
+     * If register success ,callback List<MediaBrowserCompat.MediaItem> children;
+     *
+     * @param mRegisterSessionCallback RegisterSessionCallback
+     *                                 Date: 2021/8/25 14:54
+     **/
     public void setOnRegisterSessionCallback(RegisterSessionCallback mRegisterSessionCallback) {
         this.mRegisterSessionCallback = mRegisterSessionCallback;
     }
 
+    /**
+     * Author: chenhuaxia
+     * Description:Listen MediaListDataChangeCallback .
+     *
+     * @param MediaListDataChangeCallback MediaListDataChangeCallback
+     * @Callback getMediaListDataChangeCallback(long currentPosition, LrcProcess.LrcContent mLrcContent);
+     * @Callback updateCurrentMedia(List < MediaMetadataCompat > children, int index);
+     * <p>
+     * Date: 2021/8/25 14:54
+     **/
     public void setOnMediaListDataChangeCallback(MediaListDataChangeCallback MediaListDataChangeCallback) {
         if (getTransportControls() == null) return;
         if (mMediaListDataChangeCallback == null) {
@@ -152,6 +210,13 @@ public class MediaPlayerManager {
         }
     }
 
+    /**
+     * Author: chenhuaxia
+     * Description:Set player mode(Random,Single,Order and loop or nu-loop ) .
+     *
+     * @param mode   int(Random,Single,Order)
+     * @param isLoop boolean(loop or nu-loop)
+     **/
     public void setPlayerMode(int mode, boolean isLoop) {
         mMode = mode;
         if (getTransportControls() == null) return;
@@ -198,16 +263,28 @@ public class MediaPlayerManager {
         mMediaBrowser.subscribe(mediaId, mBrowserSubscriptionCallback);
     }
 
+    /**
+     * Author: chenhuaxia
+     * Description:Connect MediaBrowser .
+     **/
     public void connect() {
         if (!mMediaBrowser.isConnected())
             mMediaBrowser.connect();
     }
 
+    /**
+     * Author: chenhuaxia
+     * Description:Disconnect MediaBrowser .
+     **/
     public void disconnect() {
         if (mMediaBrowser.isConnected())
             mMediaBrowser.disconnect();
     }
 
+    /**
+     * Author: chenhuaxia
+     * Description:Release MediaSession .
+     **/
     public void release() {
         mController.sendCommand(ACTION_RELEASE, null, null);
         mInstance = null;
@@ -216,21 +293,31 @@ public class MediaPlayerManager {
         mMediaBrowser = null;
     }
 
-    private MediaListDataChangeCallback mMediaListDataChangeCallback;
-
+    /**
+     * Author: chenhuaxia
+     * Description:Add Collect by MediaDataHelper .
+     **/
     public void addCollect() {
         boolean b = MediaDataHelper.getInstance(mContext).addCollectList(mMediaItemList.get(mCurrentIndex).getMediaId());
         Toast.makeText(mContext, b ? "收藏成功！" : "收藏失败！", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Author: chenhuaxia
+     * Description:Cancel Collect by MediaDataHelper .
+     **/
     public void cancelCollect() {
         boolean b = MediaDataHelper.getInstance(mContext).cancelCollectList(mMediaItemList.get(mCurrentIndex).getMediaId());
         Toast.makeText(mContext, b ? "取消收藏成功！" : "取消收藏失败！", Toast.LENGTH_SHORT).show();
     }
 
-    public void setData(PlayActivity playActivity, int position) {
+    /**
+     * Author: chenhuaxia
+     * Description:Set data for QueueManager by MediaData of PlayerUtils.
+     **/
+    public void setData(int position) {
         MediaData data = PlayerUtils.getData();
-        QueueManager.setData(playActivity, data, position);
+        QueueManager.setData(data, position);
     }
 
     public interface MediaListDataChangeCallback {
@@ -261,7 +348,6 @@ public class MediaPlayerManager {
 
                 }
             };
-    private static int previousState = PlaybackStateCompat.STATE_NONE;
 
     MediaControllerCompat.Callback ControllerCallback = new MediaControllerCompat.Callback() {
         @Override
@@ -288,9 +374,10 @@ public class MediaPlayerManager {
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             super.onPlaybackStateChanged(state);
             LogUtils.debug("MediaControllerCompat onPlaybackStateChanged: " + state.toString());
-            if (previousState == PlaybackStateCompat.STATE_CONNECTING && state.getState() == PlaybackStateCompat.STATE_PLAYING && mMediaListDataChangeCallback != null)
+            if (mMediaListDataChangeCallback != null && previousIndex != mCurrentIndex) {
                 mMediaListDataChangeCallback.updateCurrentMedia(QueueManager.getCurrentPlayList(), mCurrentIndex);
-            previousState = state.getState();
+                previousIndex = mCurrentIndex;
+            }
         }
 
 
@@ -320,6 +407,7 @@ public class MediaPlayerManager {
                     mCurrentIndex = extras.getInt(CUSTOMS_ACTION_RETURN_CURRENT_INDEX);
                     long mCurrentPosition = extras.getLong(CUSTOMS_ACTION_RETURN_CURRENT_POSITION);
                     LrcProcess.LrcContent mLrcContent = extras.getParcelable(CUSTOMS_ACTION_RETURN_CURRENT_LRC);
+
                     if (mCurrentPosition > -1 && mLrcContent != null)
                         mMediaListDataChangeCallback.getMediaListDataChangeCallback(mCurrentPosition, mLrcContent);
                 }

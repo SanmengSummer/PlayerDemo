@@ -8,23 +8,23 @@ import com.landmark.media.controller.utils.LogUtils;
 public class ByteUtil {
 
     /**
-     * 正向索引
+     * Positive index
      */
     public static int indexOf(byte[] tag, byte[] src) {
         return indexOf(tag, src, 1);
     }
 
     /**
-     * 获取第index个的位置<br />
-     * index从1开始
+     * Gets the position of index
+     * Index starts at 1
      */
     public static int indexOf(byte[] tag, byte[] src, int index) {
         return indexOf(tag, src, 1, src.length);
     }
 
     /**
-     * 获取第index个的位置<br />
-     * index从1开始
+     * Gets the position of index
+     * Index starts at 1
      */
     public static int indexOf(byte[] tag, byte[] src, int index, int len) {
         if (len > src.length) {
@@ -51,7 +51,7 @@ public class ByteUtil {
     }
 
     /**
-     * 倒序索引<br />
+     * Reverse index
      */
     public static int lastIndexOf(byte[] tag, byte[] src) {
 
@@ -59,16 +59,16 @@ public class ByteUtil {
     }
 
     /**
-     * 倒序获取第index个的位置<br />
-     * index从1开始
+     * Get the position of index in reverse order
+     * index starts at 1
      */
     public static int lastIndexOf(byte[] tag, byte[] src, int index) {
         return lastIndexOf(tag, src, src.length);
     }
 
     /**
-     * 倒序获取第index个的位置<br />
-     * index从1开始
+     * Get the position of index in reverse order
+     * index starts at 1
      */
     public static int lastIndexOf(byte[] tag, byte[] src, int index, int len) {
         if (len > src.length) {
@@ -97,7 +97,7 @@ public class ByteUtil {
     }
 
     /**
-     * 统计个数
+     * The number of statistical
      */
     public static int size(byte[] tag, byte[] src) {
         int size = 0;
@@ -120,7 +120,7 @@ public class ByteUtil {
     }
 
     /**
-     * 截取byte[]
+     * Get cute byte[]
      */
     public static byte[] cutBytes(int start, int end, byte[] src) {
         if (end <= start || start < 0 || end > src.length) {

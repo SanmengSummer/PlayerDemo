@@ -3,30 +3,22 @@ package com.landmark.media.controller;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
-import android.util.Log;
-
-import com.landmark.media.R;
-import com.landmark.media.controller.bean.MediaInfoBean;
 import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.model.MediaData;
 import com.landmark.media.model.MediaDataModel;
-import com.landmark.media.controller.utils.LogUtils;
-import com.landmark.media.controller.utils.MP3ID3v2.MP3ReadID3v2;
-import com.landmark.media.controller.utils.UriToPathUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Utility class to help on queue related tasks.
- */
 
+/**
+ * Author: chenhuaxia
+ * Description: Utility class to help on queue related tasks.
+ * Date: 2021/8/16 14:19
+ **/
 @SuppressLint("NewApi")
 public class QueueManager {
     public static int mInitPosition = 0;
@@ -35,35 +27,117 @@ public class QueueManager {
     private static List<MediaMetadataCompat> mCurrentPlayLists = new ArrayList<>();
     private static List<MediaBrowserCompat.MediaItem> mediaItems = new ArrayList<>();
 
+    /**
+     * Get a current play list (List<MediaMetadataCompat> ) after setData()
+     *
+     * @return List<MediaMetadataCompat>
+     * @DATE 2021/8/16 @Time 14:24
+     */
     public static List<MediaMetadataCompat> getCurrentPlayList() {
         return mCurrentPlayLists;
     }
 
-    public static List<MediaBrowserCompat.MediaItem> getCurrentListFromNameOnSearch(Context mContext, int page, int size, String type) {
-        mMediaData = MediaDataHelper.getInstance(mContext).getSearch(page, size, type);
-        return getList(mContext);
-    }
-
-    public static List<MediaBrowserCompat.MediaItem> getCurrentListForIDOnSearch(Context mContext, int page, int size, String type) {
-        mMediaData = MediaDataHelper.getInstance(mContext).getMusicDataList(page, size, type);
-        return getList(mContext);
-    }
-
-    public static List<MediaBrowserCompat.MediaItem> getCurrentListForNoneOnSearch() {
-        return mediaItems;
-    }
-
+    /**
+     * Get a media list from MediaSession (List<MediaBrowserCompat.MediaItem>) after setData()
+     *
+     * @return List<MediaBrowserCompat.MediaItem>
+     * @DATE 2021/8/16 @Time 14:24
+     */
     public static List<MediaBrowserCompat.MediaItem> getData() {
         return mediaItems;
     }
 
-    public static void setData(Context mContext, MediaData data, int initPosition) {
+    /**
+     * Set a media list by MediaData from Database (List<MediaBrowserCompat.MediaItem>) after setData()
+     *
+     * @param data         (MediaData)  Entity  of media list from Database.
+     * @param initPosition (int)
+     * @DATE 2021/8/16 @Time 14:24
+     */
+    public static void setData(MediaData data, int initPosition) {
         mInitPosition = initPosition;
         mMediaData = data;
-        getList(mContext);
+        getList();
     }
 
-    private static List<MediaBrowserCompat.MediaItem> getList(Context mContext) {
+    /**
+     * Get a random media list from CurrentPlayLists and update CurrentPlayLists (List<MediaMetadataCompat>) after setData()
+     *
+     * @return List<MediaMetadataCompat>
+     * @DATE 2021/8/16 @Time 14:24
+     */
+    public static List<MediaMetadataCompat> getRandomPlayList() {
+//        if (mMediaData == null || mediaItems == null || mediaItems.isEmpty())
+//            mediaItems = getCurrentListForIDOnSearch(mContext, 0, 10, type);
+        mCurrentPlayLists = new ArrayList<>(mMetadataLists);
+        Collections.shuffle(mCurrentPlayLists);
+        return mCurrentPlayLists;
+    }
+
+    /**
+     * Get a single media list from CurrentPlayLists and update CurrentPlayLists (List<MediaMetadataCompat>) after setData()
+     *
+     * @param currentIndex (int) Current index in CurrentPlayLists.
+     * @return List<MediaMetadataCompat>
+     * @DATE 2021/8/16 @Time 14:24
+     */
+    public static List<MediaMetadataCompat> getSinglePlayList(int currentIndex) {
+//        if (mMediaData == null || mediaItems == null || mediaItems.isEmpty())
+//            mediaItems = getCurrentListForIDOnSearch(mContext, 0, 10, type);
+        MediaMetadataCompat mediaMetadataCompat = mCurrentPlayLists.get(currentIndex);
+        mCurrentPlayLists.clear();
+        mCurrentPlayLists.add(mediaMetadataCompat);
+        return mCurrentPlayLists;
+    }
+
+    /**
+     * Get a order media list from CurrentPlayLists and update CurrentPlayLists (List<MediaMetadataCompat>) after setData()
+     *
+     * @return List<MediaMetadataCompat>
+     * @DATE 2021/8/16 @Time 14:24
+     */
+    public static List<MediaMetadataCompat> getOrderPlayList() {
+//        if (mMediaData == null || mediaItems == null || mediaItems.isEmpty())
+//            mediaItems = getCurrentListForIDOnSearch(mContext, 0, 10, type);
+        mCurrentPlayLists.clear();
+        mCurrentPlayLists.addAll(mMetadataLists);
+        return mCurrentPlayLists;
+    }
+
+    /**
+     * Fetch a current media list  directly from the database and update MediaData ,
+     * (List<MediaBrowserCompat.MediaItem>)
+     * by MediaDataHelper(Utils class).
+     *
+     * @return List<MediaBrowserCompat.MediaItem>
+     * @DATE 2021/8/16 @Time 14:24
+     */
+    public static List<MediaBrowserCompat.MediaItem>
+    getCurrentListFromNameOnSearch(Context mContext, int page, int size, String type) {
+        mMediaData = MediaDataHelper.getInstance(mContext).getSearch(page, size, type);
+        return getList();
+    }
+
+    /**
+     * Fetch a current media list  directly from the database and update MediaData ,
+     * (List<MediaBrowserCompat.MediaItem>)
+     * by MediaDataHelper(Utils class).
+     *
+     * @return List<MediaBrowserCompat.MediaItem>
+     * @DATE 2021/8/16 @Time 14:24
+     */
+    public static List<MediaBrowserCompat.MediaItem>
+    getCurrentListForIDOnSearch(Context mContext, int page, int size, String type) {
+        mMediaData = MediaDataHelper.getInstance(mContext).getMusicDataList(page, size, type);
+        return getList();
+    }
+
+    /**
+     * Get  MediaItem list from mMediaData (Data conversion)
+     *
+     * @return List<MediaBrowserCompat.MediaItem>
+     */
+    private static List<MediaBrowserCompat.MediaItem> getList() {
         List<MediaDataModel> data = mMediaData.getData();
         data.forEach(mediaDataModel -> {
             if (mediaDataModel != null) {
@@ -94,31 +168,4 @@ public class QueueManager {
         });
         return mediaItems;
     }
-
-
-    public static List<MediaMetadataCompat> getRandomPlayList() {
-//        if (mMediaData == null || mediaItems == null || mediaItems.isEmpty())
-//            mediaItems = getCurrentListForIDOnSearch(mContext, 0, 10, type);
-        mCurrentPlayLists = new ArrayList<>(mMetadataLists);
-        Collections.shuffle(mCurrentPlayLists);
-        return mCurrentPlayLists;
-    }
-
-    public static List<MediaMetadataCompat> getSinglePlayList(int currentIndex) {
-//        if (mMediaData == null || mediaItems == null || mediaItems.isEmpty())
-//            mediaItems = getCurrentListForIDOnSearch(mContext, 0, 10, type);
-        MediaMetadataCompat mediaMetadataCompat = mCurrentPlayLists.get(currentIndex);
-        mCurrentPlayLists.clear();
-        mCurrentPlayLists.add(mediaMetadataCompat);
-        return mCurrentPlayLists;
-    }
-
-    public static List<MediaMetadataCompat> getOrderPlayList() {
-//        if (mMediaData == null || mediaItems == null || mediaItems.isEmpty())
-//            mediaItems = getCurrentListForIDOnSearch(mContext, 0, 10, type);
-        mCurrentPlayLists.clear();
-        mCurrentPlayLists.addAll(mMetadataLists);
-        return mCurrentPlayLists;
-    }
-
 }
