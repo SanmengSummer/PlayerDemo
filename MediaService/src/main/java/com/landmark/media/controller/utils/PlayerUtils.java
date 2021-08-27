@@ -38,8 +38,12 @@ public class PlayerUtils {
 
     private static void supplementData(Context context, MediaData data) {
         data.getData().forEach(mediaDataModel -> {
-            if (mediaDataModel.getPath() != null) {
-                MediaInfoBean mediaInfo = getMediaInfo(context, UriToPathUtil.getUri(mediaDataModel.getPath()));
+            String path = "";
+            if (mediaDataModel.getVideoVo() != null)
+                path = mediaDataModel.getVideoVo().getPath();
+            else if (mediaDataModel.getPath() != null) path = mediaDataModel.getPath();
+            if (!path.isEmpty()) {
+                MediaInfoBean mediaInfo = getMediaInfo(context, UriToPathUtil.getUri(path));
                 if (mediaDataModel.getName() == null || mediaDataModel.getName().isEmpty())
                     mediaDataModel.setName(mediaInfo.getMediaTitle());
 

@@ -142,8 +142,9 @@ public class QueueManager {
         data.forEach(mediaDataModel -> {
             if (mediaDataModel != null) {
                 String path = "";
-                if (mediaDataModel.getPath() != null)
-                    path = mediaDataModel.getPath();
+                if (mediaDataModel.getVideoVo() != null)
+                    path = mediaDataModel.getVideoVo().getPath();
+                else if (mediaDataModel.getPath() != null) path = mediaDataModel.getPath();
                 String name = mediaDataModel.getName();
                 String singerName = mediaDataModel.getSingerVo().getName();
                 String albumName = mediaDataModel.getAlbumVo().getName();
