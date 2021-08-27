@@ -9,13 +9,13 @@ import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,6 +23,7 @@ import com.landmark.media.controller.MediaImpl.MediaPlayerManager;
 import com.landmark.media.controller.utils.LogUtils;
 import com.landmark.media.controller.utils.LrcProcess;
 import com.landmark.media.controller.utils.PlayerUtils;
+import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.db.data.MediaIDHelper;
 import com.landmark.media.model.MediaData;
 import com.landmark.media.model.MediaDataModel;
@@ -53,6 +54,12 @@ public class PlayActivity extends AppCompatActivity {
         mSeek.setOnSeekBarChangeListener(onSeekBarChangeListener);
 
         initPlayer();
+        MediaDataHelper.getInstance(this).registerDeviceListener((status, actionUsbExtraStatusValue) -> {
+            if (!status || actionUsbExtraStatusValue == -1) {
+                Toast.makeText(this, "U盘加载失败！没有播放数据！", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
     }
 
     private void initView() {
@@ -90,8 +97,6 @@ public class PlayActivity extends AppCompatActivity {
                 @Override
                 public void getMediaListDataChangeCallback(long currentPosition, LrcProcess.LrcContent mLrcContent) {
                     updateSeekBar();
-                    Log.e("mLrcContent", ": " + mLrcContent.getLrc());
-                    Log.e("mLrcContent", ": " + mLrcContent.getLrc_time());
                     if (mLrcContent != null && !mLrcContent.getLrc_time().equals(-1))
                         textTitle.setText(mLrcContent.getLrc());
                     else textTitle.setText("");
@@ -251,6 +256,9 @@ public class PlayActivity extends AppCompatActivity {
             int hasSdcardWrite = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
             if (hasSdcardWrite != PackageManager.PERMISSION_GRANTED)
                 requestPrecessionArr.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            int hasSystemAlertWindow = checkSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW);
+            if (hasSystemAlertWindow != PackageManager.PERMISSION_GRANTED)
+                requestPrecessionArr.add(Manifest.permission.SYSTEM_ALERT_WINDOW);
             if (requestPrecessionArr.size() >= 1) {
                 String[] requestArray = new String[requestPrecessionArr.size()];
                 for (int i = 0; i < requestArray.length; i++) {

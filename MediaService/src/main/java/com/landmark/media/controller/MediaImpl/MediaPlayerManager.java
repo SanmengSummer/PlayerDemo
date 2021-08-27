@@ -20,7 +20,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.landmark.media.PlayActivity;
 import com.landmark.media.controller.QueueManager;
 import com.landmark.media.controller.utils.LogUtils;
 import com.landmark.media.controller.utils.LrcProcess;
@@ -204,10 +203,9 @@ public class MediaPlayerManager {
      **/
     public void setOnMediaListDataChangeCallback(MediaListDataChangeCallback MediaListDataChangeCallback) {
         if (getTransportControls() == null) return;
-        if (mMediaListDataChangeCallback == null) {
-            getTransportControls().sendCustomAction(CUSTOMS_ACTION_RETURN_CURRENT_POSITION, null);
+        getTransportControls().sendCustomAction(CUSTOMS_ACTION_RETURN_CURRENT_POSITION, null);
+        if (mMediaListDataChangeCallback == null)
             mMediaListDataChangeCallback = MediaListDataChangeCallback;
-        }
     }
 
     /**
@@ -407,7 +405,6 @@ public class MediaPlayerManager {
                     mCurrentIndex = extras.getInt(CUSTOMS_ACTION_RETURN_CURRENT_INDEX);
                     long mCurrentPosition = extras.getLong(CUSTOMS_ACTION_RETURN_CURRENT_POSITION);
                     LrcProcess.LrcContent mLrcContent = extras.getParcelable(CUSTOMS_ACTION_RETURN_CURRENT_LRC);
-
                     if (mCurrentPosition > -1 && mLrcContent != null)
                         mMediaListDataChangeCallback.getMediaListDataChangeCallback(mCurrentPosition, mLrcContent);
                 }

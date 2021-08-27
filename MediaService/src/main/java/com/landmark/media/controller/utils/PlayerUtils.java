@@ -38,33 +38,35 @@ public class PlayerUtils {
 
     private static void supplementData(Context context, MediaData data) {
         data.getData().forEach(mediaDataModel -> {
-            MediaInfoBean mediaInfo = getMediaInfo(context, UriToPathUtil.getUri(mediaDataModel.getPath()));
-            if (mediaDataModel.getName() == null || mediaDataModel.getName().isEmpty())
-                mediaDataModel.setName(mediaInfo.getMediaTitle());
+            if (mediaDataModel.getPath() != null) {
+                MediaInfoBean mediaInfo = getMediaInfo(context, UriToPathUtil.getUri(mediaDataModel.getPath()));
+                if (mediaDataModel.getName() == null || mediaDataModel.getName().isEmpty())
+                    mediaDataModel.setName(mediaInfo.getMediaTitle());
 
-            if (mediaDataModel.getSingerVo() == null) {
-                SingerVo singerVo = new SingerVo();
-                singerVo.setId(0L);
-                singerVo.setName(mediaInfo.getMediaArtist());
-                mediaDataModel.setSingerVo(singerVo);
-            } else if (mediaDataModel.getSingerVo().getName().isEmpty())
-                mediaDataModel.getSingerVo().setName(mediaInfo.getMediaArtist());
+                if (mediaDataModel.getSingerVo() == null) {
+                    SingerVo singerVo = new SingerVo();
+                    singerVo.setId(0L);
+                    singerVo.setName(mediaInfo.getMediaArtist());
+                    mediaDataModel.setSingerVo(singerVo);
+                } else if (mediaDataModel.getSingerVo().getName().isEmpty())
+                    mediaDataModel.getSingerVo().setName(mediaInfo.getMediaArtist());
 
-            if (mediaDataModel.getAlbumVo() == null) {
-                AlbumVo albumVo = new AlbumVo();
-                albumVo.setName(mediaInfo.getMediaAlbum());
-                albumVo.setId(0L);
-                mediaDataModel.setAlbumVo(albumVo);
-            } else if (mediaDataModel.getSingerVo().getName().isEmpty())
-                mediaDataModel.getAlbumVo().setName(mediaInfo.getMediaAlbum());
+                if (mediaDataModel.getAlbumVo() == null) {
+                    AlbumVo albumVo = new AlbumVo();
+                    albumVo.setName(mediaInfo.getMediaAlbum());
+                    albumVo.setId(0L);
+                    mediaDataModel.setAlbumVo(albumVo);
+                } else if (mediaDataModel.getAlbumVo().getName().isEmpty())
+                    mediaDataModel.getAlbumVo().setName(mediaInfo.getMediaAlbum());
 
-            if (mediaDataModel.getGenreVo() == null) {
-                GenreVo genreVo = new GenreVo();
-                genreVo.setName(mediaInfo.getMediaGenre());
-                mediaDataModel.setGenreVo(genreVo);
-            } else if (mediaDataModel.getSingerVo().getName().isEmpty())
-                mediaDataModel.getGenreVo().setName(mediaInfo.getMediaGenre());
-            mediaDataModel.setIcon(mediaInfo.getMediaIconBitmap());
+                if (mediaDataModel.getGenreVo() == null) {
+                    GenreVo genreVo = new GenreVo();
+                    genreVo.setName(mediaInfo.getMediaGenre());
+                    mediaDataModel.setGenreVo(genreVo);
+                } else if (mediaDataModel.getGenreVo().getName().isEmpty())
+                    mediaDataModel.getGenreVo().setName(mediaInfo.getMediaGenre());
+                mediaDataModel.setIcon(mediaInfo.getMediaIconBitmap());
+            }
         });
         PlayerUtils.data = data;
     }

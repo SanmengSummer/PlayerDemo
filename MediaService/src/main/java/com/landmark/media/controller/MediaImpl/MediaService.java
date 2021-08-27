@@ -102,7 +102,6 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
 
         @Override
         public void onPlayFromSearch(String query, Bundle extras) {
-            if (hasGetLrcAction) mHandler.removeMessages(HANDLER_CURRENT_INFO);
             try {
                 if (query.equals(MEDIA_PLAYER_ASSETS)) {
                     AssetFileDescriptor assetFileDescriptor = extras.getParcelable(MEDIA_PLAYER_ASSETS);
@@ -121,7 +120,10 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            if (hasGetLrcAction) mHandler.sendEmptyMessage(HANDLER_CURRENT_INFO);
+            if (hasGetLrcAction) {
+                mHandler.removeMessages(HANDLER_CURRENT_INFO);
+                mHandler.sendEmptyMessage(HANDLER_CURRENT_INFO);
+            }
         }
 
         @Override
@@ -138,6 +140,7 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
                     break;
                 case CUSTOMS_ACTION_RETURN_CURRENT_POSITION:
                     hasGetLrcAction = true;
+                    mHandler.removeMessages(HANDLER_CURRENT_INFO);
                     mHandler.sendEmptyMessage(HANDLER_CURRENT_INFO);
                     break;
             }
@@ -479,7 +482,12 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
         Bundle bundle = new Bundle();
         LrcProcess lrcProcess = new LrcProcess();
         LrcProcess.LrcContent mLrcContent = new LrcProcess.LrcContent();
-        long currentPosition = mPlayerAdapter.getCurrentPosition();
+        long currentPosition;
+        if (mSession == null
+                || mSession.getController() == null
+                || mSession.getController().getPlaybackState() == null)
+            currentPosition = mPlayerAdapter.getCurrentPosition();
+        else currentPosition = mSession.getController().getPlaybackState().getPosition();
         String lrc = null;
         try {
             MetaInfoParser_MP3 metaInfoParser_mp3 = new MetaInfoParser_MP3();
@@ -487,11 +495,11 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
             lrc = metaInfoParser_mp3.getLrc();
         } catch (IOException ignored) {
         }
-        if (lrc != null && !lrc.isEmpty() && lrc != "Unknown") {
+        if (lrc != null && !lrc.isEmpty() && !lrc.equals("Unknown")) {
             lrcProcess.readLRCFormString(lrc, "UTF-8");
         } else {
             String realFilePath = UriToPathUtil.getRealFilePath(this, uri);
-            String lrcFilePath = realFilePath.replace("mp3", "lrc");
+            String lrcFilePath = realFilePath.substring(0, realFilePath.length() - 4) + ".lrc";
             File file = new File(lrcFilePath);
             if (file.exists()) lrcProcess.readLRC(file);
         }

@@ -7,10 +7,8 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.PlaybackParams;
 import android.net.Uri;
-import android.util.Log;
 import android.view.Surface;
 
-import com.landmark.media.controller.utils.LogUtils;
 
 import java.io.IOException;
 
@@ -90,7 +88,6 @@ public class PlayerAdapter {
         if (mMediaPlayer == null) return 0;
         if (mMediaPlayer.getDuration() == 0) return 0;
         return mMediaPlayer.getCurrentPosition();
-
     }
 
     public long getDuration() {
@@ -147,8 +144,8 @@ public class PlayerAdapter {
         try {
             mMediaPlayer.reset();
             mMediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor(), assetFileDescriptor.getStartOffset(), assetFileDescriptor.getLength());
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
-            mMediaPlayer.prepare();
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mMediaPlayer.prepareAsync();
         } catch (Exception e) {
             e.printStackTrace();
         }
