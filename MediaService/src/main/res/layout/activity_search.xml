@@ -47,6 +47,12 @@
             android:onClick="artist_search"
             android:text="按歌手搜索" />
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="video_search"
+            android:text="视频搜索" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -73,11 +79,11 @@
             android:onClick="name_search"
             android:text="按歌名搜索" />
 
-        <Button
+<!--        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="Test"
-            android:text="test" />
+            android:text="test" />-->
     </LinearLayout>
 
     <TextView

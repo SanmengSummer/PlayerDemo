@@ -1,13 +1,18 @@
 package com.landmark.media.db.dao;
 
+import java.util.List;
+import java.util.ArrayList;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 
 import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.Property;
+import org.greenrobot.greendao.internal.SqlUtils;
 import org.greenrobot.greendao.internal.DaoConfig;
 import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.database.DatabaseStatement;
+
+import com.landmark.media.db.table.FolderVo;
 
 import com.landmark.media.db.table.VideoVo;
 
@@ -33,10 +38,12 @@ public class VideoVoDao extends AbstractDao<VideoVo, Long> {
         public final static Property Size = new Property(6, String.class, "size", false, "SIZE");
         public final static Property Duration = new Property(7, String.class, "duration", false, "DURATION");
         public final static Property Des = new Property(8, String.class, "des", false, "DES");
-        public final static Property FavFlag = new Property(9, String.class, "favFlag", false, "FAV_FLAG");
+        public final static Property FavFlag = new Property(9, boolean.class, "favFlag", false, "FAV_FLAG");
         public final static Property FolderId = new Property(10, Long.class, "folderId", false, "FOLDER_ID");
         public final static Property Suffix = new Property(11, String.class, "suffix", false, "SUFFIX");
     }
+
+    private DaoSession daoSession;
 
 
     public VideoVoDao(DaoConfig config) {
@@ -45,6 +52,7 @@ public class VideoVoDao extends AbstractDao<VideoVo, Long> {
     
     public VideoVoDao(DaoConfig config, DaoSession daoSession) {
         super(config, daoSession);
+        this.daoSession = daoSession;
     }
 
     /** Creates the underlying database table. */
@@ -60,7 +68,7 @@ public class VideoVoDao extends AbstractDao<VideoVo, Long> {
                 "\"SIZE\" TEXT," + // 6: size
                 "\"DURATION\" TEXT," + // 7: duration
                 "\"DES\" TEXT," + // 8: des
-                "\"FAV_FLAG\" TEXT," + // 9: favFlag
+                "\"FAV_FLAG\" INTEGER NOT NULL ," + // 9: favFlag
                 "\"FOLDER_ID\" INTEGER," + // 10: folderId
                 "\"SUFFIX\" TEXT);"); // 11: suffix
     }
@@ -119,11 +127,7 @@ public class VideoVoDao extends AbstractDao<VideoVo, Long> {
         if (des != null) {
             stmt.bindString(9, des);
         }
- 
-        String favFlag = entity.getFavFlag();
-        if (favFlag != null) {
-            stmt.bindString(10, favFlag);
-        }
+        stmt.bindLong(10, entity.getFavFlag() ? 1L: 0L);
  
         Long folderId = entity.getFolderId();
         if (folderId != null) {
@@ -184,11 +188,7 @@ public class VideoVoDao extends AbstractDao<VideoVo, Long> {
         if (des != null) {
             stmt.bindString(9, des);
         }
- 
-        String favFlag = entity.getFavFlag();
-        if (favFlag != null) {
-            stmt.bindString(10, favFlag);
-        }
+        stmt.bindLong(10, entity.getFavFlag() ? 1L: 0L);
  
         Long folderId = entity.getFolderId();
         if (folderId != null) {
@@ -199,6 +199,12 @@ public class VideoVoDao extends AbstractDao<VideoVo, Long> {
         if (suffix != null) {
             stmt.bindString(12, suffix);
         }
+    }
+
+    @Override
+    protected final void attachEntity(VideoVo entity) {
+        super.attachEntity(entity);
+        entity.__setDaoSession(daoSession);
     }
 
     @Override
@@ -218,7 +224,7 @@ public class VideoVoDao extends AbstractDao<VideoVo, Long> {
             cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // size
             cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // duration
             cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // des
-            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // favFlag
+            cursor.getShort(offset + 9) != 0, // favFlag
             cursor.isNull(offset + 10) ? null : cursor.getLong(offset + 10), // folderId
             cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11) // suffix
         );
@@ -236,7 +242,7 @@ public class VideoVoDao extends AbstractDao<VideoVo, Long> {
         entity.setSize(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
         entity.setDuration(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
         entity.setDes(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
-        entity.setFavFlag(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
+        entity.setFavFlag(cursor.getShort(offset + 9) != 0);
         entity.setFolderId(cursor.isNull(offset + 10) ? null : cursor.getLong(offset + 10));
         entity.setSuffix(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
      }
@@ -266,4 +272,95 @@ public class VideoVoDao extends AbstractDao<VideoVo, Long> {
         return true;
     }
     
+    private String selectDeep;
+
+    protected String getSelectDeep() {
+        if (selectDeep == null) {
+            StringBuilder builder = new StringBuilder("SELECT ");
+            SqlUtils.appendColumns(builder, "T", getAllColumns());
+            builder.append(',');
+            SqlUtils.appendColumns(builder, "T0", daoSession.getFolderVoDao().getAllColumns());
+            builder.append(" FROM table_video T");
+            builder.append(" LEFT JOIN table_folder T0 ON T.\"FOLDER_ID\"=T0.\"_id\"");
+            builder.append(' ');
+            selectDeep = builder.toString();
+        }
+        return selectDeep;
+    }
+    
+    protected VideoVo loadCurrentDeep(Cursor cursor, boolean lock) {
+        VideoVo entity = loadCurrent(cursor, 0, lock);
+        int offset = getAllColumns().length;
+
+        FolderVo folderVo = loadCurrentOther(daoSession.getFolderVoDao(), cursor, offset);
+        entity.setFolderVo(folderVo);
+
+        return entity;    
+    }
+
+    public VideoVo loadDeep(Long key) {
+        assertSinglePk();
+        if (key == null) {
+            return null;
+        }
+
+        StringBuilder builder = new StringBuilder(getSelectDeep());
+        builder.append("WHERE ");
+        SqlUtils.appendColumnsEqValue(builder, "T", getPkColumns());
+        String sql = builder.toString();
+        
+        String[] keyArray = new String[] { key.toString() };
+        Cursor cursor = db.rawQuery(sql, keyArray);
+        
+        try {
+            boolean available = cursor.moveToFirst();
+            if (!available) {
+                return null;
+            } else if (!cursor.isLast()) {
+                throw new IllegalStateException("Expected unique result, but count was " + cursor.getCount());
+            }
+            return loadCurrentDeep(cursor, true);
+        } finally {
+            cursor.close();
+        }
+    }
+    
+    /** Reads all available rows from the given cursor and returns a list of new ImageTO objects. */
+    public List<VideoVo> loadAllDeepFromCursor(Cursor cursor) {
+        int count = cursor.getCount();
+        List<VideoVo> list = new ArrayList<VideoVo>(count);
+        
+        if (cursor.moveToFirst()) {
+            if (identityScope != null) {
+                identityScope.lock();
+                identityScope.reserveRoom(count);
+            }
+            try {
+                do {
+                    list.add(loadCurrentDeep(cursor, false));
+                } while (cursor.moveToNext());
+            } finally {
+                if (identityScope != null) {
+                    identityScope.unlock();
+                }
+            }
+        }
+        return list;
+    }
+    
+    protected List<VideoVo> loadDeepAllAndCloseCursor(Cursor cursor) {
+        try {
+            return loadAllDeepFromCursor(cursor);
+        } finally {
+            cursor.close();
+        }
+    }
+    
+
+    /** A raw-style query where you can pass any WHERE clause and arguments. */
+    public List<VideoVo> queryDeep(String where, String... selectionArg) {
+        Cursor cursor = db.rawQuery(getSelectDeep() + where, selectionArg);
+        return loadDeepAllAndCloseCursor(cursor);
+    }
+ 
 }

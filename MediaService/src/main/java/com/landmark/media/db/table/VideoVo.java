@@ -6,6 +6,13 @@ import android.os.Parcelable;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.Keep;
+import org.greenrobot.greendao.annotation.ToOne;
+import org.greenrobot.greendao.DaoException;
+
+import com.landmark.media.db.dao.DaoSession;
+import com.landmark.media.db.dao.FolderVoDao;
+import com.landmark.media.db.dao.VideoVoDao;
 
 /**********************************************
  * Filename： FileVo
@@ -22,27 +29,26 @@ import org.greenrobot.greendao.annotation.Id;
 public class VideoVo implements Parcelable {
     @Id(autoincrement = true)
     private Long id;
-
     private String name;
     private String symbolName;
-
-
     private String path;
     private String width;
     private String height;
     private String size;
     private String duration;
     private String des;
-    private String favFlag;
+    private boolean favFlag;
 
     private Long folderId;
+    @ToOne(joinProperty = "folderId") // 注意该参数的值
+    private FolderVo folderVo;
 
     private String suffix;
 
-    @Generated(hash = 1458415207)
+    @Keep
     public VideoVo(Long id, String name, String symbolName, String path,
                    String width, String height, String size, String duration, String des,
-                   String favFlag, Long folderId, String suffix) {
+                   boolean favFlag, Long folderId, String suffix) {
         this.id = id;
         this.name = name;
         this.symbolName = symbolName;
@@ -61,6 +67,22 @@ public class VideoVo implements Parcelable {
     public VideoVo() {
     }
 
+
+    /**
+     * Used to resolve relations
+     */
+    @Generated(hash = 2040040024)
+    private transient DaoSession daoSession;
+
+    /**
+     * Used for active entity operations.
+     */
+    @Generated(hash = 1635686857)
+    private transient VideoVoDao myDao;
+
+    @Generated(hash = 6141150)
+    private transient Long folderVo__resolvedKey;
+
     protected VideoVo(Parcel in) {
         if (in.readByte() == 0) {
             id = null;
@@ -75,12 +97,13 @@ public class VideoVo implements Parcelable {
         size = in.readString();
         duration = in.readString();
         des = in.readString();
-        favFlag = in.readString();
+        favFlag = in.readByte() != 0;
         if (in.readByte() == 0) {
             folderId = null;
         } else {
             folderId = in.readLong();
         }
+        folderVo = in.readParcelable(FolderVo.class.getClassLoader());
         suffix = in.readString();
     }
 
@@ -95,6 +118,14 @@ public class VideoVo implements Parcelable {
             return new VideoVo[size];
         }
     };
+
+    public boolean isFavFlag() {
+        return favFlag;
+    }
+
+    public void setFavFlag(boolean favFlag) {
+        this.favFlag = favFlag;
+    }
 
     public Long getId() {
         return this.id;
@@ -168,13 +199,6 @@ public class VideoVo implements Parcelable {
         this.des = des;
     }
 
-    public String getFavFlag() {
-        return this.favFlag;
-    }
-
-    public void setFavFlag(String favFlag) {
-        this.favFlag = favFlag;
-    }
 
     public Long getFolderId() {
         return this.folderId;
@@ -199,6 +223,7 @@ public class VideoVo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+
         if (id == null) {
             dest.writeByte((byte) 0);
         } else {
@@ -213,13 +238,96 @@ public class VideoVo implements Parcelable {
         dest.writeString(size);
         dest.writeString(duration);
         dest.writeString(des);
-        dest.writeString(favFlag);
+        dest.writeByte((byte) (favFlag ? 1 : 0));
         if (folderId == null) {
             dest.writeByte((byte) 0);
         } else {
             dest.writeByte((byte) 1);
             dest.writeLong(folderId);
         }
+        dest.writeParcelable(folderVo, flags);
         dest.writeString(suffix);
+    }
+
+    /**
+     * To-one relationship, resolved on first access.
+     */
+    @Generated(hash = 2110994881)
+    public FolderVo getFolderVo() {
+        Long __key = this.folderId;
+        if (folderVo__resolvedKey == null || !folderVo__resolvedKey.equals(__key)) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            FolderVoDao targetDao = daoSession.getFolderVoDao();
+            FolderVo folderVoNew = targetDao.load(__key);
+            synchronized (this) {
+                folderVo = folderVoNew;
+                folderVo__resolvedKey = __key;
+            }
+        }
+        return folderVo;
+    }
+
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
+    @Generated(hash = 1009014164)
+    public void setFolderVo(FolderVo folderVo) {
+        synchronized (this) {
+            this.folderVo = folderVo;
+            folderId = folderVo == null ? null : folderVo.getId();
+            folderVo__resolvedKey = folderId;
+        }
+    }
+
+    /**
+     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#delete(Object)}.
+     * Entity must attached to an entity context.
+     */
+    @Generated(hash = 128553479)
+    public void delete() {
+        if (myDao == null) {
+            throw new DaoException("Entity is detached from DAO context");
+        }
+        myDao.delete(this);
+    }
+
+    /**
+     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#refresh(Object)}.
+     * Entity must attached to an entity context.
+     */
+    @Generated(hash = 1942392019)
+    public void refresh() {
+        if (myDao == null) {
+            throw new DaoException("Entity is detached from DAO context");
+        }
+        myDao.refresh(this);
+    }
+
+    /**
+     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#update(Object)}.
+     * Entity must attached to an entity context.
+     */
+    @Generated(hash = 713229351)
+    public void update() {
+        if (myDao == null) {
+            throw new DaoException("Entity is detached from DAO context");
+        }
+        myDao.update(this);
+    }
+
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
+    @Generated(hash = 1762629499)
+    public void __setDaoSession(DaoSession daoSession) {
+        this.daoSession = daoSession;
+        myDao = daoSession != null ? daoSession.getVideoVoDao() : null;
+    }
+
+    public boolean getFavFlag() {
+        return this.favFlag;
     }
 }

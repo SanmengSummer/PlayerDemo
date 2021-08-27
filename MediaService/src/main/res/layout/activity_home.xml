@@ -35,6 +35,12 @@
             android:layout_height="wrap_content"
             android:onClick="name_search"
             android:text="按默认" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="video"
+            android:text="视频" />
     </LinearLayout>
 
     <LinearLayout

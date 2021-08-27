@@ -9,6 +9,7 @@ import com.landmark.media.db.table.FolderVo;
 import com.landmark.media.db.table.GenreVo;
 import com.landmark.media.db.table.RecordVo;
 import com.landmark.media.db.table.SingerVo;
+import com.landmark.media.db.table.VideoVo;
 import com.landmark.media.utils.LogUtils;
 
 /**********************************************
@@ -48,6 +49,8 @@ public class MediaDataModel implements Parcelable {
     private Long recordId;
     private RecordVo recordVo; //历史记录
     private Bitmap icon; //新加 icon
+    private Long videoId;
+    private VideoVo videoVo; //历史记录
 
 
     protected MediaDataModel(Parcel in) {
@@ -96,7 +99,30 @@ public class MediaDataModel implements Parcelable {
         }
         recordVo = in.readParcelable(RecordVo.class.getClassLoader());
         icon = in.readParcelable(Bitmap.class.getClassLoader());
+        if (in.readByte() == 0) {
+            videoId = null;
+        } else {
+            videoId = in.readLong();
+        }
+        videoVo = in.readParcelable(VideoVo.class.getClassLoader());
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<MediaDataModel> CREATOR = new Creator<MediaDataModel>() {
+        @Override
+        public MediaDataModel createFromParcel(Parcel in) {
+            return new MediaDataModel(in);
+        }
+
+        @Override
+        public MediaDataModel[] newArray(int size) {
+            return new MediaDataModel[size];
+        }
+    };
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
@@ -151,24 +177,15 @@ public class MediaDataModel implements Parcelable {
         }
         dest.writeParcelable(recordVo, flags);
         dest.writeParcelable(icon, flags);
+        if (videoId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(videoId);
+        }
+        dest.writeParcelable(videoVo, flags);
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<MediaDataModel> CREATOR = new Creator<MediaDataModel>() {
-        @Override
-        public MediaDataModel createFromParcel(Parcel in) {
-            return new MediaDataModel(in);
-        }
-
-        @Override
-        public MediaDataModel[] newArray(int size) {
-            return new MediaDataModel[size];
-        }
-    };
 
     public boolean isFavFlag() {
         return favFlag;
@@ -347,6 +364,21 @@ public class MediaDataModel implements Parcelable {
     public void setIcon(Bitmap icon) {
         this.icon = icon;
     }
+    public Long getVideoId() {
+        return videoId;
+    }
+
+    public void setVideoId(Long videoId) {
+        this.videoId = videoId;
+    }
+
+    public VideoVo getVideoVo() {
+        return videoVo;
+    }
+
+    public void setVideoVo(VideoVo videoVo) {
+        this.videoVo = videoVo;
+    }
 
     @Override
     public String toString() {
@@ -371,6 +403,8 @@ public class MediaDataModel implements Parcelable {
                 ", genreVo=" + genreVo +
                 ", recordId=" + recordId +
                 ", recordVo=" + recordVo +
+                ", videoId=" + videoId +
+                ", videoVo=" + videoVo +
                 '}';
     }
 

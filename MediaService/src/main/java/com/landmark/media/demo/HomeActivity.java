@@ -1,5 +1,6 @@
 package com.landmark.media.demo;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,7 +28,9 @@ import com.landmark.media.demo.common.Constants;
 import com.landmark.media.interfaces.IDeviceListener;
 import com.landmark.media.model.MediaData;
 import com.landmark.media.model.MediaDataModel;
+import com.landmark.media.model.TypeModel;
 import com.landmark.media.utils.LogUtils;
+import com.landmark.media.utils.SharedUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -70,6 +73,11 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
         initView();
         initRecycler();
+
+        Intent intent = new Intent();
+        ComponentName name = new ComponentName("com.app.carscanner","com.app.scanner.ScannerService");
+        intent.setComponent(name);
+        startService(intent);
     }
 
     private void initView() {
@@ -88,8 +96,11 @@ public class HomeActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mSearchAdapter = new SearchAdapter(mSearch, this);
         mRecyclerView.setAdapter(mSearchAdapter);
-        name_search(null);
-
+        boolean devices = (boolean) SharedUtils.getInstance(this).getParam(
+                com.landmark.media.common.Constants.SHARE_DEVICE_STATUS, false);
+        if (devices) {
+            name_search(null);
+        }
 //        androidx.appcompat.app.ActionBar supportActionBar = getSupportActionBar();
 //        supportActionBar.setTitle("首页");
         mInstance.registerDeviceListener(new IDeviceListener() {
@@ -98,6 +109,10 @@ public class HomeActivity extends AppCompatActivity {
                 if (!status) {
                     mSearch.clear();
                     mSearchAdapter.notifyDataSetChanged();
+                } else {
+                    if (mSearch.size() == 0) {
+                        name_search(null);
+                    }
                 }
             }
         });
@@ -284,6 +299,7 @@ public class HomeActivity extends AppCompatActivity {
      * @param view
      */
     public void name_search(View view) {
+        mSearchCurrentPage = 0;
         MediaData search = mInstance.getMusicDataList(mSearchCurrentPage, mSearchSize,
                 MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_ROOT,
                         false, MediaIDHelper.TYPE_1));
@@ -354,8 +370,15 @@ public class HomeActivity extends AppCompatActivity {
         if (isSearchAudio) {
             String str;
             if (mType.contains(MediaIDHelper.MEDIA_ID_ROOT)) {
-                str = MediaIDHelper.getType(mType,
-                        false, MediaIDHelper.TYPE_1);
+                boolean contains = mType.contains(MediaIDHelper.TYPE_2);
+                if (contains) {
+                    str = MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_ROOT,
+                            false, MediaIDHelper.TYPE_2);
+                } else {
+                    str = MediaIDHelper.getType(mType,
+                            false, MediaIDHelper.TYPE_1);
+                }
+
             } else {
                 str = MediaIDHelper.getType(mType,
                         false, MediaIDHelper.TYPE_1, mValue);
@@ -386,7 +409,8 @@ public class HomeActivity extends AppCompatActivity {
         List<MediaDataModel> collect = models.stream().filter(new Predicate<MediaDataModel>() {
             @Override
             public boolean test(MediaDataModel model) {
-                if (model.getItemType().equals(MetadataTypeValue.TYPE_MUSIC.getType())) {
+                if (model.getItemType().equals(MetadataTypeValue.TYPE_MUSIC.getType())
+                        || model.getItemType().equals(MetadataTypeValue.TYPE_VIDEO.getType())) {
                     return true;
                 }
                 return false;
@@ -427,6 +451,33 @@ public class HomeActivity extends AppCompatActivity {
 
     public void bt_skip_history(View view) {
         startActivity(new Intent(this, CollectHistoryActivity.class));
+    }
+
+    public void video(View view) {
+        mSearchListCurrentPage = 0;
+        MediaData search = mInstance.getMusicDataList(mSearchListCurrentPage, mSearchSize,
+                MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_ROOT,
+                        false, MediaIDHelper.TYPE_2));
+        mSearch.clear();
+        mSearch.addAll(search.getData());
+        LogUtils.debug(TAG, " page: " + search.getCurrentPage() + "size: " + search.getPageSize()
+                + " totalNum: " + search.getTotalNum() + " totalPage: " + search.getTotalPage());
+        mSearchAdapter.notifyDataSetChanged();
+        saveStatus(MediaIDHelper.MEDIA_ID_ROOT +
+                MediaIDHelper.SEARCH_SEPARATOR + MediaIDHelper.TYPE_2, "", true);
+        setPager(search);
+        mSearchAdapter.setOnClickListener(new SearchAdapter.IOnClicklistener() {
+            @Override
+            public void onClickListener(MetadataTypeValue value, String id) {
+
+            }
+
+            @Override
+            public void onClickMusicListener(List<MediaDataModel> models, int model) {
+                listener(models, model);
+            }
+        });
+
     }
 
 

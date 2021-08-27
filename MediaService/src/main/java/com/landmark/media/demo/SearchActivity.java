@@ -91,9 +91,9 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         initView();
         initRecycler();
 
-        androidx.appcompat.app.ActionBar supportActionBar = getSupportActionBar();
+        /*androidx.appcompat.app.ActionBar supportActionBar = getSupportActionBar();
         supportActionBar.setTitle("搜索");
-        supportActionBar.setDisplayHomeAsUpEnabled(true);
+        supportActionBar.setDisplayHomeAsUpEnabled(true);*/
 
 
         mInstance.registerDeviceListener(new IDeviceListener() {
@@ -514,6 +514,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             Toast.makeText(this, "请输入搜索内容", Toast.LENGTH_SHORT).show();
             return;
         }
+        mSearchCurrentPage = 0;
         String searchText = text.toString();
         MediaData search = mInstance.getSearch(mSearchCurrentPage, mSearchSize,
                 MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_TITLE,
@@ -532,7 +533,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 + " totalNum: " + search.getTotalNum() + " totalPage: " + search.getTotalPage());
         mSearchAdapter.notifyDataSetChanged();
 
-        saveStatus(MediaIDHelper.MEDIA_ID_MUSICS_BY_TITLE, searchText, true);
+        saveStatus(MediaIDHelper.MEDIA_ID_MUSICS_BY_TITLE, searchText, false);
         setpager(search);
     }
 
@@ -591,8 +592,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             if (mType.equals(MediaIDHelper.MEDIA_ID_ROOT)) {
                 str = MediaIDHelper.getSearchRootType(MediaIDHelper.TYPE_1, mValue, null);
             } else {
-                str = MediaIDHelper.getType(mType,
-                        true, MediaIDHelper.TYPE_1, mValue);
+                if (mType.contains(MediaIDHelper.MEDIA_ID_MUSICS_BY_VIDEO)) {
+                    str = MediaIDHelper.getType(mType,
+                            true, MediaIDHelper.TYPE_2, mValue);
+                } else {
+                    str = MediaIDHelper.getType(mType,
+                            true, MediaIDHelper.TYPE_1, mValue);
+                }
             }
             mSearchCurrentPage = mSearchCurrentPage + 1;
             search = mInstance.getSearch(mSearchCurrentPage, mSearchSize,
@@ -609,7 +615,8 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         List<MediaDataModel> collect = models.stream().filter(new Predicate<MediaDataModel>() {
             @Override
             public boolean test(MediaDataModel model) {
-                if (model.getItemType().equals(MetadataTypeValue.TYPE_MUSIC.getType())) {
+                if (model.getItemType().equals(MetadataTypeValue.TYPE_MUSIC.getType())
+                        || model.getItemType().equals(MetadataTypeValue.TYPE_VIDEO.getType())) {
                     return true;
                 }
                 return false;
@@ -646,6 +653,41 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
         Toast.makeText(this, "" + model.getData().size() + " position: " + position, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 视频搜索
+     *
+     * @param view
+     */
+    public void video_search(View view) {
+
+        Editable text = mEditText.getText();
+        if (TextUtils.isEmpty(text)) {
+            Toast.makeText(this, "请输入搜索内容", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String searchText = text.toString();
+        mSearchCurrentPage = 0;
+        MediaData search = mInstance.getSearch(mSearchCurrentPage, mSearchSize,
+                MediaIDHelper.getType(MediaIDHelper.MEDIA_ID_MUSICS_BY_VIDEO,
+                        true, MediaIDHelper.TYPE_2, searchText));
+        Log.d(TAG, "onClick button10: " + search.getData().size());
+
+        search.getData().forEach(new Consumer<MediaDataModel>() {
+            @Override
+            public void accept(MediaDataModel dataModel) {
+                Log.d(TAG, "文件夹 ->  : " + dataModel);
+            }
+        });
+        mSearch.clear();
+        mSearch.addAll(search.getData());
+        LogUtils.debug(TAG, " page: " + search.getCurrentPage() + "size: " + search.getPageSize()
+                + " totalNum: " + search.getTotalNum() + " totalPage: " + search.getTotalPage());
+        mSearchAdapter.notifyDataSetChanged();
+
+        saveStatus(MediaIDHelper.MEDIA_ID_MUSICS_BY_VIDEO, searchText, false);
+        setpager(search);
     }
 
     static class MyHandler extends Handler {

@@ -77,9 +77,9 @@ public class CollectHistoryActivity extends AppCompatActivity {
         mSearchAdapter = new SearchAdapter(mSearch, this);
         mRecyclerView.setAdapter(mSearchAdapter);
 
-        androidx.appcompat.app.ActionBar supportActionBar = getSupportActionBar();
+        /*androidx.appcompat.app.ActionBar supportActionBar = getSupportActionBar();
         supportActionBar.setTitle("收藏及历史记录");
-        supportActionBar.setDisplayHomeAsUpEnabled(true);
+        supportActionBar.setDisplayHomeAsUpEnabled(true);*/
 
         //u盘 状态
         mInstance.registerDeviceListener(new IDeviceListener() {

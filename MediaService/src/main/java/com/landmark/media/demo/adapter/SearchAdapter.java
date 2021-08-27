@@ -36,6 +36,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private final int TYPE_FOLDER = 3;
     private final int TYPE_GENRE = 4;
     private final int TYPE_RECORD = 5;
+    private final int TYPE_VIDEO = 6;
 
     public SearchAdapter(List<MediaDataModel> models, Context context) {
         this.models = models;
@@ -59,6 +60,8 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             inflate = View.inflate(context, R.layout.item_genre, null);
         } else if (TYPE_RECORD == viewType) {
             inflate = View.inflate(context, R.layout.item_history, null);
+        } else if (TYPE_VIDEO == viewType) {
+            inflate = View.inflate(context, R.layout.item_video, null);
         }
         searchViewHolder = new SearchViewHolder(inflate);
         return searchViewHolder;
@@ -86,6 +89,9 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         } else if (MetadataTypeValue.TYPE_MUSIC.getType().equals(itemType)) {
             holder1 = (SearchViewHolder) holder;
             holder1.name.setText(mediaDataModel.getName());
+        } else if (MetadataTypeValue.TYPE_VIDEO.getType().equals(itemType)) {
+            holder1 = (SearchViewHolder) holder;
+            holder1.name.setText(mediaDataModel.getName());
         } else {
             holder1 = (SearchViewHolder) holder;
             holder1.name.setText(mediaDataModel.getName());
@@ -111,7 +117,8 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 }
                 String itemType = mediaDataModel.getItemType();
                 Long id = 0l;
-                if (MetadataTypeValue.TYPE_MUSIC.getType().equals(itemType)) {
+                if (MetadataTypeValue.TYPE_MUSIC.getType().equals(itemType)
+                        || MetadataTypeValue.TYPE_VIDEO.getType().equals(itemType)) {
                     LogUtils.debug("TAG", " ITEMTYPE listener TYPE_MUSIC" + listener);
                     listener.onClickMusicListener(models, position);
                 } else {
@@ -150,6 +157,8 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             return TYPE_FOLDER;
         } else if (MetadataTypeValue.TYPE_GENRE.getType().equals(itemType)) {
             return TYPE_GENRE;
+        } else if (MetadataTypeValue.TYPE_VIDEO.getType().equals(itemType)) {
+            return TYPE_VIDEO;
         } else {
             return TYPE_RECORD;
         }

@@ -1,11 +1,13 @@
 package com.landmark.media.db.data;
 
+import static android.content.Context.MODE_PRIVATE;
 import static android.content.Intent.ACTION_MEDIA_MOUNTED;
 import static android.content.Intent.ACTION_MEDIA_UNMOUNTED;
 import static android.os.Environment.MEDIA_MOUNTED;
 
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.widget.Toast;
 
 import com.landmark.media.application.MediaApplication;
@@ -17,6 +19,7 @@ import com.landmark.media.model.MediaDataModel;
 import com.landmark.media.model.TypeModel;
 import com.landmark.media.receiver.DeviceBroadcastReceiver;
 import com.landmark.media.utils.LogUtils;
+import com.landmark.media.utils.SharedUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +50,7 @@ public class MediaDataHelper implements IDataProvider {
 
     private DeviceBroadcastReceiver mDeviceBroadcastReceiver;
     private IDeviceListener mListener;
+    private final SharedUtils mShareInstance;
 
     /**
      * get EngineeringModeManager.
@@ -64,6 +68,9 @@ public class MediaDataHelper implements IDataProvider {
         mMusicProvider = MusicProvider.getInstance(context);
         loadDatabase();
         registerListener();
+        mShareInstance = SharedUtils.getInstance(context);
+        isDevicesStatus = (boolean) mShareInstance.getParam(Constants.SHARE_DEVICE_STATUS, false);
+        LogUtils.debug(TAG, "isDevicesStatus: " + isDevicesStatus);
     }
 
     /**
@@ -145,8 +152,9 @@ public class MediaDataHelper implements IDataProvider {
         musicDataListType.setCategory_name(category);
         musicDataListType.setPage(page);
         musicDataListType.setSize(size);
+        String format = musicDataListType.getFormat();
         LogUtils.debug(TAG, "getPlayingList page: " + page + " size: " + size + "  category :"
-                + category);
+                + category + " format: " + format);
         if (mMusicProvider == null) {
             return mediaData;
         }
@@ -154,7 +162,11 @@ public class MediaDataHelper implements IDataProvider {
         LogUtils.debug(TAG, "getCategory_name " + musicDataListType.getCategory());
         switch (musicDataListType.getCategory()) {
             case MediaIDHelper.MEDIA_ID_ROOT:
-                mediaDataModels.addAll(mMusicProvider.getAllDataList(musicDataListType, mediaData));
+                if (musicDataListType.getFormat().equals(MediaIDHelper.TYPE_1)) {
+                    mediaDataModels.addAll(mMusicProvider.getAllDataList(musicDataListType, mediaData));
+                } else if (musicDataListType.getFormat().equals(MediaIDHelper.TYPE_2)) {
+                    mediaDataModels.addAll(mMusicProvider.getAllDataList(musicDataListType, mediaData));
+                }
                 break;
             case MediaIDHelper.MEDIA_ID_MUSICS_BY_ALBUM:
                 mediaDataModels.addAll(mMusicProvider.getAlbumDataList(musicDataListType, mediaData));
@@ -239,6 +251,9 @@ public class MediaDataHelper implements IDataProvider {
                 break;
             case MediaIDHelper.MEDIA_ID_MUSICS_BY_TITLE:
                 mediaDataModels.addAll(mMusicProvider.getSearchTitle(searchDataType, false, mediaData));
+                break;
+            case MediaIDHelper.MEDIA_ID_MUSICS_BY_VIDEO:
+                mediaDataModels.addAll(mMusicProvider.getSearchVideo(searchDataType, false, mediaData));
                 break;
             default:
                 break;
@@ -421,13 +436,15 @@ public class MediaDataHelper implements IDataProvider {
     /**
      * @param devicesStatus
      * @param actionUsbExtraStatusValue -1 卸载
-     *                                  1  开始
+     *                                  0  开始
+     *                                  1  正在扫描
      *                                  2  中断
      *                                  3  结束
      *                                  4  可以查询
      */
     public void setDevicesStatus(boolean devicesStatus, int actionUsbExtraStatusValue) {
         isDevicesStatus = devicesStatus;
+        mShareInstance.setParam(Constants.SHARE_DEVICE_STATUS, devicesStatus);
         if (mListener != null) {
             mListener.onDeviceStatus(devicesStatus, actionUsbExtraStatusValue);
         }

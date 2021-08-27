@@ -27,6 +27,7 @@ import com.landmark.media.db.dao.FolderVoDao;
 import com.landmark.media.db.dao.GenreVoDao;
 import com.landmark.media.db.dao.RecordVoDao;
 import com.landmark.media.db.dao.SingerVoDao;
+import com.landmark.media.db.dao.VideoVoDao;
 import com.landmark.media.db.table.AlbumVo;
 import com.landmark.media.db.table.AudioVo;
 import com.landmark.media.db.table.FolderVo;
@@ -98,10 +99,31 @@ public class MusicProvider {
         int size = typeModel.getSize();
         LogUtils.debug(TAG, " getAllDataList page: " + page + " size: " + size);
         int offset = page * size;
-        List<AudioVo> limit = mAudioHelper.queryBuilder().offset(offset).limit(size)
-                .orderRaw(getRawOrderSql()).list();
-        List<MediaDataModel> collect = convertData(limit);
-        long count = mAudioHelper.queryBuilder().count();
+        List<MediaDataModel> collect = new ArrayList<>();
+        long count = 0l;
+        if (typeModel.getFormat().equals(MediaIDHelper.TYPE_1)) {
+            List<AudioVo> limit = mAudioHelper.queryBuilder().offset(offset).limit(size)
+                    .orderRaw(getRawOrderSql()).list();
+            collect.addAll(convertData(limit));
+            count = mAudioHelper.queryBuilder().count();
+        } else {
+            MediaDataModel[] value = new MediaDataModel[1];
+            List<VideoVo> limit = mVideoHelper.queryBuilder().offset(offset).limit(size)
+                    .orderRaw(getRawOrderSql()).list();
+            List<MediaDataModel> collect1 = limit.stream().map(new Function<VideoVo, MediaDataModel>() {
+                @Override
+                public MediaDataModel apply(VideoVo videoVo) {
+                    value[0] = new MediaDataModel();
+                    value[0].setName(videoVo.getName());
+                    value[0].setVideoId(videoVo.getId());
+                    value[0].setVideoVo(videoVo);
+                    value[0].setItemType(MetadataTypeValue.TYPE_VIDEO.getType());
+                    return value[0];
+                }
+            }).collect(Collectors.toList());
+            collect.addAll(collect1);
+            count = mVideoHelper.queryBuilder().count();
+        }
         setTotalData(mediaData, size, count);
         return collect;
     }
@@ -386,7 +408,7 @@ public class MusicProvider {
 
         List<SingerVo> list4 = mSingerHelper.queryBuilder()
                 .whereOr(SingerVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")
-                ,SingerVoDao.Properties.SymbolName.like("%" + typeModel.getCategory_name() + "%")).list();
+                        , SingerVoDao.Properties.SymbolName.like("%" + typeModel.getCategory_name() + "%")).list();
         List<MediaDataModel> collect2 = list4.stream().map(new Function<SingerVo, MediaDataModel>() {
             @Override
             public MediaDataModel apply(SingerVo singerVo) {
@@ -399,6 +421,23 @@ public class MusicProvider {
             }
         }).collect(Collectors.toList());
         mSearchAllData.addAll(collect2);
+
+
+        List<VideoVo> list6 = mVideoHelper.queryBuilder()
+                .whereOr(VideoVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%")
+                        , VideoVoDao.Properties.SymbolName.like("%" + typeModel.getCategory_name() + "%")).list();
+        List<MediaDataModel> collectVideo = list6.stream().map(new Function<VideoVo, MediaDataModel>() {
+            @Override
+            public MediaDataModel apply(VideoVo videovo) {
+                value[0] = new MediaDataModel();
+                value[0].setVideoVo(videovo);
+                value[0].setVideoId(videovo.getId());
+                value[0].setName(videovo.getName());
+                value[0].setItemType(MetadataTypeValue.TYPE_VIDEO.getType());
+                return value[0];
+            }
+        }).collect(Collectors.toList());
+        mSearchAllData.addAll(collectVideo);
 //        }
         int page = typeModel.getPage();
         int size = typeModel.getSize();
@@ -559,13 +598,41 @@ public class MusicProvider {
         List<MediaDataModel> mSearchAlbumData = new ArrayList<>();
         String category_name = typeModel.getCategory_name();
         if (isList) {
-            //根据查到的专辑 来查询具体专辑下的歌曲
-            List<AudioVo> audioVos = mAudioHelper.queryBuilder().offset(offset).limit(size).where(
+            //根据查到的文件夹 来查询具体文件夹下的歌曲
+            List<AudioVo> audioVos = mAudioHelper.queryBuilder().where(
                     AudioVoDao.Properties.FolderId.eq(category_name)).orderRaw(getRawOrderSql()).list();
             mSearchAlbumData.addAll(convertData(audioVos));
-            long count = mAudioHelper.queryBuilder().where(
-                    AudioVoDao.Properties.FolderId.eq(category_name)).count();
+            List<VideoVo> list1 = mVideoHelper.queryBuilder().orderRaw(getRawOrderSql()).where(
+                    VideoVoDao.Properties.FolderId.eq(category_name)).list();
+            LogUtils.debug(TAG, " VideoVo list1: " + list1);
+            List<MediaDataModel> collect1 = list1.stream().map(new Function<VideoVo, MediaDataModel>() {
+                @Override
+                public MediaDataModel apply(VideoVo videoVo) {
+                    value[0] = new MediaDataModel();
+                    value[0].setName(videoVo.getName());
+                    value[0].setVideoId(videoVo.getId());
+                    value[0].setVideoVo(videoVo);
+                    value[0].setItemType(MetadataTypeValue.TYPE_VIDEO.getType());
+                    return value[0];
+                }
+            }).collect(Collectors.toList());
+            mSearchAlbumData.addAll(collect1);
+
+
+            long count = (long) mSearchAlbumData.size();
             setTotalData(mediaData, size, count);
+            /*if (size > count || offset > count) {
+                size = (int) count;
+            }*/
+            LogUtils.debug(TAG, " getSearchAll page: "
+                    + page + " offset: " + (offset + 1) + " count: " + count + " size: " + size);
+            int fromIndex = offset; //0 2 4
+            int toIndex = size + fromIndex; //2 4
+            if (toIndex >= count) {
+                toIndex = (int) count;
+            }
+            List<MediaDataModel> mediaDataModel = mSearchAlbumData.subList(fromIndex, toIndex);
+            return mediaDataModel;
         } else {
             //搜专辑名称的 模糊查找
             List<FolderVo> list2 = mFolderHelper.queryBuilder()
@@ -616,6 +683,49 @@ public class MusicProvider {
             long count = mAudioHelper.queryBuilder()
                     .whereOr(AudioVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%"),
                             AudioVoDao.Properties.SymbolName.like("%" + typeModel.getCategory_name() + "%")).count();
+            setTotalData(mediaData, size, count);
+        }
+        return mSearchAlbumData;
+    }
+
+    public Collection<? extends MediaDataModel> getSearchVideo(TypeModel typeModel,
+                                                               boolean isList, MediaData mediaData) {
+
+        //根据查到的专辑 来查询具体专辑下的歌曲
+        int page = typeModel.getPage();
+        int size = typeModel.getSize();
+        LogUtils.debug(TAG, " getFolderDataList page: " + page + " size: " + size);
+        int offset = page * size;
+        List<MediaDataModel> mSearchAlbumData = new ArrayList<>();
+        String category_name = typeModel.getCategory_name();
+        if (isList) {
+           /* List<AudioVo> audioVos = mAudioHelper.queryBuilder().offset(offset).limit(size).orderRaw(getRawOrderSql()).where(
+                    AudioVoDao.Properties.Id.eq(category_name)).list();
+            mSearchAlbumData.addAll(convertData(audioVos));
+            long count = mAudioHelper.queryBuilder().where(
+                    AudioVoDao.Properties.Id.eq(category_name)).count();
+            setTotalData(mediaData, size, count);*/
+        } else {
+            List<VideoVo> list1 = mVideoHelper.queryBuilder()
+                    .whereOr(VideoVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%"),
+                            VideoVoDao.Properties.SymbolName.like("%" + typeModel.getCategory_name() + "%"))
+                    .orderRaw(getSearchRawOrderSql(category_name)).offset(offset).limit(size).list();
+            MediaDataModel[] value = new MediaDataModel[1];
+            List<MediaDataModel> collect1 = list1.stream().map(new Function<VideoVo, MediaDataModel>() {
+                @Override
+                public MediaDataModel apply(VideoVo videoVo) {
+                    value[0] = new MediaDataModel();
+                    value[0].setName(videoVo.getName());
+                    value[0].setVideoId(videoVo.getId());
+                    value[0].setVideoVo(videoVo);
+                    value[0].setItemType(MetadataTypeValue.TYPE_VIDEO.getType());
+                    return value[0];
+                }
+            }).collect(Collectors.toList());
+            mSearchAlbumData.addAll(collect1);
+            long count = mVideoHelper.queryBuilder()
+                    .whereOr(VideoVoDao.Properties.Name.like("%" + typeModel.getCategory_name() + "%"),
+                            VideoVoDao.Properties.SymbolName.like("%" + typeModel.getCategory_name() + "%")).count();
             setTotalData(mediaData, size, count);
         }
         return mSearchAlbumData;
@@ -766,7 +876,27 @@ public class MusicProvider {
             }).collect(Collectors.toList());
             list.addAll(mAudioHelper.queryBuilder().orderRaw(getRawOrderSql()).where(
                     AudioVoDao.Properties.FolderId.eq(name)).list());
-            count = (long) list.size();
+
+            List<VideoVo> list1 = mVideoHelper.queryBuilder().orderRaw(getRawOrderSql()).where(
+                    VideoVoDao.Properties.FolderId.eq(name)).list();
+            LogUtils.debug(TAG, " VideoVo list1: " + list1);
+            MediaDataModel[] value = new MediaDataModel[1];
+            List<MediaDataModel> collect1 = list1.stream().map(new Function<VideoVo, MediaDataModel>() {
+                @Override
+                public MediaDataModel apply(VideoVo videoVo) {
+                    value[0] = new MediaDataModel();
+                    value[0].setName(videoVo.getName());
+                    value[0].setVideoId(videoVo.getId());
+                    value[0].setVideoVo(videoVo);
+                    value[0].setItemType(MetadataTypeValue.TYPE_VIDEO.getType());
+                    return value[0];
+                }
+            }).collect(Collectors.toList());
+
+            List<MediaDataModel> convertData = convertData(list);
+            convertData.addAll(collect1);
+
+            count = (long) convertData.size();
             setTotalData(mediaData, size, count);
             /*if (size > count || offset > count) {
                 size = (int) count;
@@ -778,9 +908,8 @@ public class MusicProvider {
             if (toIndex >= count) {
                 toIndex = (int) count;
             }
-            List<AudioVo> mediaDataModel = list.subList(fromIndex, toIndex);
-
-            return convertData(mediaDataModel);
+            List<MediaDataModel> mediaDataModel = convertData.subList(fromIndex, toIndex);
+            return mediaDataModel;
         } else if (type.equals(MetadataTypeValue.TYPE_MUSIC.getType())) {
             list = mAudioHelper.queryBuilder().offset(offset).limit(size).orderRaw(getRawOrderSql()).where(
                     AudioVoDao.Properties.Id.eq(name)).list();

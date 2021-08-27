@@ -46,9 +46,9 @@ public class DaoManager {
                 LogUtils.error(TAG, "SD卡不存在，请加载SD卡");
                 throw new RuntimeException("SD卡不存在，请加载SD卡");
             }
-//            String dbDir = android.os.Environment.getExternalStorageDirectory().toString()+
-//                    "/scannerdb";
-            String dbDir = "/data/data/com.landmark.mediaservice/scannerdb";
+            String dbDir = android.os.Environment.getExternalStorageDirectory().toString()+
+                    "/scannerdb";
+//            String dbDir = "/data/data/com.landmark.mediaservice/scannerdb";
 
             DatabaseContext context = new DatabaseContext(MediaApplication.getContext(), dbDir);
             DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, Constants.DB_NAME, null);

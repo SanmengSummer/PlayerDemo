@@ -31,6 +31,19 @@ android {
             storeFile file('platform.jks')
             storePassword 'android'
         }
+        /*release {
+            storeFile file("platform.keystore")
+            storePassword 'android'
+            keyAlias 'platform'
+            keyPassword 'android'
+        }
+
+        debug {
+            storeFile file('platform.keystore')
+            storePassword 'android'
+            keyAlias 'platform'
+            keyPassword 'android'
+        }*/
     }
 
     buildTypes {

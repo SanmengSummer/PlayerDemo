@@ -13,7 +13,7 @@ package com.landmark.media.demo.common;
  ***********************************************/
 public class Constants {
     //外层条数 如：流派，专辑，歌手
-    public static final int mExSize = 20;
+    public static final int mExSize = 5;
     //音乐显示的条数
-    public static final int mMusicSize = 20;
+    public static final int mMusicSize = 5;
 }

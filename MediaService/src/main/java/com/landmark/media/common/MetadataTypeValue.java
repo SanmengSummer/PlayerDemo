@@ -17,6 +17,7 @@ public enum MetadataTypeValue {
     TYPE_GENRE("TYPE_GENRE"),
     TYPE_FOLDER("TYPE_FOLDER"),
     TYPE_RECORD("TYPE_RECORD"),
+    TYPE_VIDEO("TYPE_VIDEO"),
     TYPE_MUSIC("TYPE_MUSIC");
 
     private String type;
