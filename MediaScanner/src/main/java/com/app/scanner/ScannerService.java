@@ -30,6 +30,7 @@ import com.app.scanner.util.Utils;
 import static android.content.Intent.ACTION_MEDIA_MOUNTED;
 import static android.content.Intent.ACTION_MEDIA_UNMOUNTED;
 import static android.os.Environment.MEDIA_MOUNTED;
+import static com.app.scanner.util.Constants.ACTION_SCAN_DEVICE;
 
 
 public class ScannerService extends Service {
@@ -49,7 +50,7 @@ public class ScannerService extends Service {
         IntentFilter usbDeviceStateFilter = new IntentFilter();
         usbDeviceStateFilter.addAction(ACTION_MEDIA_MOUNTED);
         usbDeviceStateFilter.addAction(ACTION_MEDIA_UNMOUNTED);
-        usbDeviceStateFilter.addAction(MEDIA_MOUNTED);
+        usbDeviceStateFilter.addAction(ACTION_SCAN_DEVICE);
 
 
         usbDeviceStateFilter.addDataScheme("file");

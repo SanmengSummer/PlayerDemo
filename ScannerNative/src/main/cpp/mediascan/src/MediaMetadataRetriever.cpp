@@ -46,6 +46,7 @@ int MediaMetadataRetriever::setDataSource(const char *path) {
 void MediaMetadataRetriever::reset() {
     if(mAvFormatContext){
         avformat_close_input(&mAvFormatContext);
+        mAvFormatContext = nullptr;
     }
     clearMetadata();
 }

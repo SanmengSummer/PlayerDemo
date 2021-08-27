@@ -26,13 +26,16 @@ import static com.app.scanner.util.Constants.ACTION_SCAN_STATUS;
 import static com.app.scanner.util.Constants.ACTION_USB_EXTRA_NAME;
 import static com.app.scanner.util.Constants.ACTION_USB_EXTRA_STATUS;
 import static com.app.scanner.util.Constants.ACTION_USB_EXTRA_STATUS_VALUE;
+import static com.app.scanner.util.Constants.AUDIO_PAGE_SISE;
 import static com.app.scanner.util.Utils.getSymbolName;
 
 
 public class CarUsbDevice extends BaseDevice {
     private String mScanPath;
-    ScannerJni scannerJni;
+    private ScannerJni scannerJni;
     private int count = 0;
+
+    private long time = System.currentTimeMillis();
 
     public CarUsbDevice(DeviceTypeEnum typeEnum) {
         super(typeEnum);
@@ -50,69 +53,8 @@ public class CarUsbDevice extends BaseDevice {
                 VideoVo.class,
                 DaoManager.getInstance().getDaoSession().getVideoVoDao()
         );
+
         scannerJni = new ScannerJni(CarApp.contextApp, new ScannerJni.CallBackAudioInfo() {
-            @Override
-            public void callBackAudioInfo(String msg) {
-                if (!TextUtils.isEmpty(msg.trim())) {
-                    String result[] = msg.split("@@");
-                    for (int i = 0; i < result.length; i++) {
-                        notifyToGetData();
-                        if (!TextUtils.isEmpty(result[i].trim())) {
-
-                            String tempStr[] = result[i].split(";");
-                            Map<String, String> tempMap = new HashMap<>();
-                            for (int j = 0; j < tempStr.length; j++) {
-                                String tempResult[] = tempStr[j].split(":");
-                                if (tempResult.length == 2) {
-                                    tempMap.put(tempResult[0], tempResult[1]);
-                                } else {
-                                    tempMap.put(tempResult[0], "");
-                                }
-                            }
-
-                            if ("0".equals(tempMap.get("mFileType"))) {
-                                // F_TYPE_DIR = 0,
-                                FolderVo folderVo = new FolderVo();
-                                folderVo.setName(tempMap.get("mFileName"));
-                                if (!TextUtils.isEmpty(tempMap.get("mParentPath"))) {
-                                    folderVo.setParentPath(tempMap.get("mParentPath"));
-                                }
-                                folderVo.setPath(tempMap.get("mFilePath"));
-                                folderVo.setSymbolName(getSymbolName(tempMap.get("mFileName")));
-                                folderHelper.insert(folderVo);
-                            } else if ("1".equals(tempMap.get("mFileType"))) {
-                                //F_TYPE_AUDIO,
-                                AudioVo audioVo = new AudioVo();
-                                audioVo.setPath(tempMap.get("mFilePath"));
-                                audioVo.setName(tempMap.get("mFileName"));
-                                audioVo.setSymbolName(getSymbolName(tempMap.get("mFileName")));
-                                audioVo.setSize(tempMap.get("mFileSize"));
-                                audioVo.setTitle(tempMap.get("mTitle"));
-                                audioVo.setAlbum(tempMap.get("mAlbum"));
-                                audioVo.setSinger(tempMap.get("mComposer"));
-                                audioVo.setGenre(tempMap.get("mGenre"));
-                                audioVo.setFolder(tempMap.get("mParentPath"));
-                                audioVo.setYear(tempMap.get("mYear"));
-                                audioVo.setDuration(tempMap.get("mDuration"));
-
-                                audioHelper.insert(audioVo);
-
-                            } else if ("2".equals(tempMap.get("mFileType"))) {
-                                //F_TYPE_VIDEO,
-                                VideoVo videoVo = new VideoVo();
-                                videoVo.setPath(tempMap.get("mFilePath"));
-                                videoVo.setName(tempMap.get("mFileName"));
-                                videoVo.setSymbolName(getSymbolName(tempMap.get("mFileName")));
-                                videoVo.setFolder(tempMap.get("mParentPath"));
-                                videoVo.setSize(tempMap.get("mFileSize"));
-
-                                videoHelper.insert(videoVo);
-                            }
-                        }
-
-                    }
-                }
-            }
 
             @Override
             public void callBackStatusInfo(String msg) {
@@ -125,8 +67,13 @@ public class CarUsbDevice extends BaseDevice {
                 childIntent.putExtra(ACTION_USB_EXTRA_STATUS, info.status);
                 CarApp.contextApp.sendBroadcast(childIntent);
                 if (info.status == 3) {
-                    LogUtils.debug("stop scan data1");
-//                    test.native_stop(mScanPath);
+                    time = System.currentTimeMillis() - time;
+                    LogUtils.debug("scan finish ,spend time:" + time);
+//                    scannerJni.native_stop(mScanPath);
+
+                } else if (info.status == 0) {
+                    time = System.currentTimeMillis();
+                    LogUtils.debug("start  to scan");
                 }
             }
 
@@ -178,10 +125,6 @@ public class CarUsbDevice extends BaseDevice {
         });
     }
 
-    public CarUsbDevice build() {
-        return this;
-    }
-
     @Override
     public List<MediaInfoVo> createSourceList() {
         return null;
@@ -200,19 +143,19 @@ public class CarUsbDevice extends BaseDevice {
     public void startScanDevice() {
         String configPath = DaoManager.getInstance().getDbPath() + "/config.json";
         String deviceId = mScanPath + "";
-        String scanPath = mScanPath + "/test1";
+        String scanPath = mScanPath + "";
         scannerJni.native_init(deviceId, configPath, scanPath);
     }
 
     public void release() {
-        LogUtils.debug("clear all data");
         DaoManager.getInstance().deleteAllData();
-        scannerJni.native_stop(mScanPath);
+//        scannerJni.native_stop(mScanPath);
+        LogUtils.debug("clear db & stop scan");
     }
 
     private void notifyToGetData() {
         count++;
-        if (count == 10) {
+        if (count == AUDIO_PAGE_SISE) {
             LogUtils.debug("notifyToGetData");
             Intent childIntent = new Intent();
             childIntent.setAction(ACTION_SCAN_STATUS);

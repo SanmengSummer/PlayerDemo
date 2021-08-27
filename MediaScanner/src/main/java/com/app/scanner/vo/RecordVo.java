@@ -29,21 +29,16 @@ public class RecordVo {
 
     private String playTime;
 
-    @Override
-    public String toString() {
-        return "RecordVo{" +
-                "id=" + id +
-                ", mediaId=" + mediaId +
-                ", endDuration='" + endDuration + '\'' +
-                '}';
-    }
+    private int type;
 
-    @Generated(hash = 694501553)
-    public RecordVo(Long id, Long mediaId, String endDuration, String playTime) {
+    @Generated(hash = 109281623)
+    public RecordVo(Long id, Long mediaId, String endDuration, String playTime,
+            int type) {
         this.id = id;
         this.mediaId = mediaId;
         this.endDuration = endDuration;
         this.playTime = playTime;
+        this.type = type;
     }
 
     @Generated(hash = 75010410)
@@ -81,5 +76,14 @@ public class RecordVo {
     public void setPlayTime(String playTime) {
         this.playTime = playTime;
     }
+
+    public int getType() {
+        return this.type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
 
 }

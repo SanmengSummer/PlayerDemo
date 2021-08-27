@@ -29,11 +29,14 @@ import java.util.ArrayList;
 public class ScannerJni {
     private static CallBackAudioInfo callBackAudioInfo;
 
+    private static final int TYPE_LIST = 2;
+    private static final int TYPE_STATUS = 1;
+
     static {
         System.loadLibrary("scanner_jni");
     }
 
-    Context mContext;
+    private Context mContext;
 
     private static Handler mHandler;
 
@@ -48,18 +51,12 @@ public class ScannerJni {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
-
-                if (msg.what == 0) {
-                    String info = (String) msg.obj;
-                    if (callBackAudioInfo != null && !TextUtils.isEmpty(info.trim())) {
-                        callBackAudioInfo.callBackAudioInfo(info);
-                    }
-                } else if (msg.what == 1) {
+                if (msg.what == TYPE_STATUS) {
                     String info = (String) msg.obj;
                     if (callBackAudioInfo != null && !TextUtils.isEmpty(info.trim())) {
                         callBackAudioInfo.callBackStatusInfo(info);
                     }
-                } else if (msg.what == 2) {
+                } else if (msg.what == TYPE_LIST) {
                     ArrayList<MediaInfoVo> list = (ArrayList<MediaInfoVo>) msg.obj;
                     if (callBackAudioInfo != null) {
                         callBackAudioInfo.callBackMediaInfoList(list);
@@ -73,35 +70,24 @@ public class ScannerJni {
 
     public native void native_stop(String deviceId);
 
-    public native ArrayList<MediaInfoVo> native_getListMedias();
-
-    //java层方法的具体实现
-    public void JNICallJava(String msg) {
-        Message message = mHandler.obtainMessage();
-        message.what = 0;
-        message.obj = msg;
-        mHandler.handleMessage(message);
-    }
 
     //java层方法的具体实现
     public void JNICallJavaMediaList(ArrayList<MediaInfoVo> msg) {
         Message message = mHandler.obtainMessage();
-        message.what = 2;
+        message.what = TYPE_LIST;
         message.obj = msg;
         mHandler.handleMessage(message);
     }
 
     public void JNICallJavaStatus(String msg) {
         Message message = mHandler.obtainMessage();
-        message.what = 1;
+        message.what = TYPE_STATUS;
         message.obj = msg;
         mHandler.handleMessage(message);
     }
 
 
     public interface CallBackAudioInfo {
-        void callBackAudioInfo(String info);
-
         void callBackStatusInfo(String info);
 
         void callBackMediaInfoList(ArrayList<MediaInfoVo> msg);

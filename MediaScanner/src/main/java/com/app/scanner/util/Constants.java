@@ -9,4 +9,7 @@ public interface Constants {
     public static final String ACTION_SCAN_STATUS = "com.app.scanner.receiver.action_scan_status";
     public static final String DB_NAME = "media_scanner.db";
     public static final String DB_FOLDER = "scannerdb";
+    public static final int AUDIO_PAGE_SISE = 20;
+    public static final String ACTION_SCAN_DEVICE="com.app.scanner.receiver.action_scan_device";
+    public static final String ACTION_SCAN_EXTRA_NAME="scan_usb_extra_path";
 }

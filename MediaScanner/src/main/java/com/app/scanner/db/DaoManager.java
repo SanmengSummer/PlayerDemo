@@ -1,12 +1,7 @@
 package com.app.scanner.db;
 
-import android.util.Log;
-import android.view.View;
-
-import com.app.scanner.BuildConfig;
 import com.app.scanner.CarApp;
 import com.app.scanner.util.Constants;
-import com.app.scanner.util.LogUtils;
 import com.app.scanner.vo.DaoMaster;
 import com.app.scanner.vo.DaoSession;
 
@@ -14,28 +9,13 @@ import org.greenrobot.greendao.query.QueryBuilder;
 
 import static com.app.scanner.util.Constants.DB_FOLDER;
 
-/**********************************************
- * Filename： DaoManager
- * Author:   wangyi@zlingsmart.com.cn
- * Description：
- * Date：
- * Version:
- * History:
- *------------------------------------------------------
- * Version  date      author   description
- * V0.0.1        wangyi   1) …
- ***********************************************/
 public class DaoManager {
 
-    //多线程中要被共享的使用volatile关键字修饰
     private volatile static DaoManager manager = new DaoManager();
     private DaoMaster mDaoMaster;
     private DaoMaster.DevOpenHelper mHelper;
     private DaoSession mDaoSession;
 
-    /**
-     * 单例模式获得操作数据库对象
-     */
     public static DaoManager getInstance() {
         return manager;
     }
@@ -83,8 +63,8 @@ public class DaoManager {
      * 打开输出日志，默认关闭
      */
     public void setDebug() {
-        QueryBuilder.LOG_SQL = true;
-        QueryBuilder.LOG_VALUES = true;
+        QueryBuilder.LOG_SQL = false;
+        QueryBuilder.LOG_VALUES = false;
     }
 
     /**
@@ -117,5 +97,6 @@ public class DaoManager {
         DaoManager.getInstance().getDaoSession().getRecordVoDao().deleteAll();
         DaoManager.getInstance().getDaoSession().getSingerVoDao().deleteAll();
         DaoManager.getInstance().getDaoSession().getVideoVoDao().deleteAll();
+        DaoManager.getInstance().getDaoSession().getUsbDeviceVoDao().deleteAll();
     }
 }

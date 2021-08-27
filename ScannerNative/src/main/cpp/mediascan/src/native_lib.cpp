@@ -161,21 +161,20 @@ ListenerImpl *listener = new ListenerImpl();
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_landmark_scannernative_ScannerJni_native_1stop(JNIEnv *env, jobject thiz, jstring device_id) {
+Java_com_landmark_scannernative_ScannerJni_native_1stop(JNIEnv *env, jobject thiz,
+                                                        jstring device_id) {
     manager->stop(listener->jstring2str(env, device_id));
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_landmark_scannernative_ScannerJni_native_1init(JNIEnv *env, jobject thiz, jstring device_id,
+Java_com_landmark_scannernative_ScannerJni_native_1init(JNIEnv *env, jobject thiz,
+                                                        jstring device_id,
                                                         jstring config_path, jstring scan_path) {
     jclass cls = env->FindClass("com/landmark/scannernative/ScannerJni");
     javaCallback.cls = static_cast<jclass>(env->NewGlobalRef(cls));
-    javaCallback.midInfo = static_cast<jmethodID>(env->GetMethodID(cls, "JNICallJava",
-                                                                   "(Ljava/lang/String;)V"));
     javaCallback.midStatus = static_cast<jmethodID>(env->GetMethodID(cls, "JNICallJavaStatus",
                                                                      "(Ljava/lang/String;)V"));
-
 
     javaCallback.list = static_cast<jmethodID>(env->GetMethodID(cls, "JNICallJavaMediaList",
                                                                 "(Ljava/util/ArrayList;)V"));

@@ -8,6 +8,7 @@ import android.widget.Toast
 import com.app.scanner.db.DaoManager
 import com.app.scanner.db.DbOperationHelper
 import com.app.scanner.util.LogUtils
+import com.app.scanner.util.Utils
 import com.app.scanner.vo.AudioVo
 
 
@@ -104,6 +105,9 @@ class MainActivity : Activity() {
             var intent = Intent()
             intent.setClass(this, TestJniMainAct::class.java)
             startActivity(intent)
+        }
+      findViewById<TextView>(R.id.tv_usb_path).setOnClickListener {
+          Toast.makeText(this, "路径："+Utils.checkUsbDiskPath(), Toast.LENGTH_SHORT).show()
         }
 
     }

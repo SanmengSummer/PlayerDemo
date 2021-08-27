@@ -7,7 +7,6 @@ using  namespace std;
 
 typedef struct java_callback {
     jclass cls;
-    jmethodID midInfo;
     jmethodID midStatus;
     jmethodID list;
     jclass media_info_cls;
