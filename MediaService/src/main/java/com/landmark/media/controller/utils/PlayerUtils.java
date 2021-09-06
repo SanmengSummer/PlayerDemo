@@ -1,13 +1,15 @@
 package com.landmark.media.controller.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.util.Log;
 
-import com.landmark.media.PlayActivity;
+import com.landmark.media.controller.PlayActivity;
 import com.landmark.media.R;
 import com.landmark.media.controller.bean.MediaInfoBean;
 import com.landmark.media.controller.utils.MP3ID3v2.MP3ReadID3v2;
@@ -32,10 +34,12 @@ public class PlayerUtils {
     public static void startPlayer(Context context, MediaData data, int position) {
         supplementData(context, data);
         Intent intent = new Intent(context, PlayActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(PLAYER_FOR_INDEX, position);
         context.startActivity(intent);
     }
 
+    @SuppressLint("NewApi")
     private static void supplementData(Context context, MediaData data) {
         data.getData().forEach(mediaDataModel -> {
             String path = "";
@@ -45,27 +49,34 @@ public class PlayerUtils {
             if (!path.isEmpty()) {
                 MediaInfoBean mediaInfo = getMediaInfo(context, UriToPathUtil.getUri(path));
                 if (mediaDataModel.getName() == null || mediaDataModel.getName().isEmpty())
-                    mediaDataModel.setName(mediaInfo.getMediaTitle());
+                    if (mediaDataModel.getVideoVo() == null || mediaDataModel.getVideoVo().getName() == null)
+                        if (mediaInfo.getMediaTitle() == null)
+                            mediaDataModel.setName("");
+                        else mediaDataModel.setName(mediaInfo.getMediaTitle());
+                    else mediaDataModel.setName(mediaDataModel.getVideoVo().getName());
 
-                if (mediaDataModel.getSingerVo() == null) {
+                if (mediaDataModel.getSingerVo() == null || mediaDataModel.getSingerVo().getName() == null) {
+                    String singer = mediaInfo.getMediaArtist() == null ? "" : mediaInfo.getMediaArtist();
                     SingerVo singerVo = new SingerVo();
                     singerVo.setId(0L);
-                    singerVo.setName(mediaInfo.getMediaArtist());
+                    singerVo.setName(singer);
                     mediaDataModel.setSingerVo(singerVo);
                 } else if (mediaDataModel.getSingerVo().getName().isEmpty())
                     mediaDataModel.getSingerVo().setName(mediaInfo.getMediaArtist());
 
-                if (mediaDataModel.getAlbumVo() == null) {
+                if (mediaDataModel.getAlbumVo() == null || mediaDataModel.getAlbumVo().getName() == null) {
+                    String album = mediaInfo.getMediaAlbum() == null ? "" : mediaInfo.getMediaAlbum();
                     AlbumVo albumVo = new AlbumVo();
-                    albumVo.setName(mediaInfo.getMediaAlbum());
+                    albumVo.setName(album);
                     albumVo.setId(0L);
                     mediaDataModel.setAlbumVo(albumVo);
                 } else if (mediaDataModel.getAlbumVo().getName().isEmpty())
                     mediaDataModel.getAlbumVo().setName(mediaInfo.getMediaAlbum());
 
-                if (mediaDataModel.getGenreVo() == null) {
+                if (mediaDataModel.getGenreVo() == null || mediaDataModel.getGenreVo().getName() == null) {
+                    String genre = mediaInfo.getMediaGenre() == null ? "" : mediaInfo.getMediaGenre();
                     GenreVo genreVo = new GenreVo();
-                    genreVo.setName(mediaInfo.getMediaGenre());
+                    genreVo.setName(genre);
                     mediaDataModel.setGenreVo(genreVo);
                 } else if (mediaDataModel.getGenreVo().getName().isEmpty())
                     mediaDataModel.getGenreVo().setName(mediaInfo.getMediaGenre());

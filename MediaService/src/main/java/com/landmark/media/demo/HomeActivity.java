@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
@@ -97,7 +98,7 @@ public class HomeActivity extends AppCompatActivity {
         mSearchAdapter = new SearchAdapter(mSearch, this);
         mRecyclerView.setAdapter(mSearchAdapter);
         boolean devices = (boolean) SharedUtils.getInstance(this).getParam(
-                com.landmark.media.common.Constants.SHARE_DEVICE_STATUS, false);
+                com.landmark.media.common.Constants.SHARE_DEVICE_STATUS, true);
         if (devices) {
             name_search(null);
         }

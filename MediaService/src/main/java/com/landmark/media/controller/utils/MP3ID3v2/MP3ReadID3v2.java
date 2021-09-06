@@ -1,5 +1,7 @@
 package com.landmark.media.controller.utils.MP3ID3v2;
 
+import com.landmark.media.controller.utils.LogUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,8 +14,8 @@ import java.nio.charset.StandardCharsets;
  */
 public class MP3ReadID3v2 {
     private InputStream mp3ips;
-    //        public Charset charset =  Charset.forName("GB18030");
-    public Charset charset = StandardCharsets.UTF_16;
+            public Charset charset =  Charset.forName("big5");
+//    public Charset charset = StandardCharsets.UTF_16;
     private Id3v2Info info;
 
     public MP3ReadID3v2(File file) {
@@ -70,7 +72,6 @@ public class MP3ReadID3v2 {
                 info.setLrcContent(new String(readInfo(buff, "SYLT"), charset));
             }
         } catch (IOException e) {
-            e.printStackTrace();
         } finally {
             mp3ips.close();
         }

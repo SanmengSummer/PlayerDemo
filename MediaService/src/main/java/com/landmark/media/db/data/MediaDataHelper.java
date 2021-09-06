@@ -69,7 +69,7 @@ public class MediaDataHelper implements IDataProvider {
         loadDatabase();
         registerListener();
         mShareInstance = SharedUtils.getInstance(context);
-        isDevicesStatus = (boolean) mShareInstance.getParam(Constants.SHARE_DEVICE_STATUS, false);
+        isDevicesStatus = (boolean) mShareInstance.getParam(Constants.SHARE_DEVICE_STATUS, true);
         LogUtils.debug(TAG, "isDevicesStatus: " + isDevicesStatus);
     }
 

@@ -125,7 +125,7 @@ public class ByteUtil {
     public static byte[] cutBytes(int start, int end, byte[] src) {
         if (end <= start || start < 0 || end > src.length) {
             try {
-                LogUtils.debug("参数错误");
+                LogUtils.debug("cutBytes error!");
                 return null;
             } catch (Exception e) {
             }

@@ -17,6 +17,7 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.Log;
 import android.view.Surface;
 import android.widget.Toast;
 
@@ -27,6 +28,7 @@ import androidx.media.MediaBrowserServiceCompat;
 import com.landmark.media.controller.QueueManager;
 import com.landmark.media.controller.utils.LogUtils;
 import com.landmark.media.controller.utils.LrcProcess;
+import com.landmark.media.controller.utils.MP3ID3v2.MP3ReadID3v2;
 import com.landmark.media.controller.utils.MP3ID3v2.MetaInfoParser_MP3;
 import com.landmark.media.controller.utils.UriToPathUtil;
 import com.landmark.media.db.data.MediaDataHelper;
@@ -490,10 +492,11 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
         else currentPosition = mSession.getController().getPlaybackState().getPosition();
         String lrc = null;
         try {
-            MetaInfoParser_MP3 metaInfoParser_mp3 = new MetaInfoParser_MP3();
-            metaInfoParser_mp3.parse(UriToPathUtil.getRealFile(this, uri));
+//            MetaInfoParser_MP3 metaInfoParser_mp3 = new MetaInfoParser_MP3();
+            MP3ReadID3v2 metaInfoParser_mp3 = new MP3ReadID3v2(UriToPathUtil.getRealFile(this, uri));
+//            metaInfoParser_mp3.parse(UriToPathUtil.getRealFile(this, uri));
             lrc = metaInfoParser_mp3.getLrc();
-        } catch (IOException ignored) {
+        } catch (Exception ignored) {
         }
         if (lrc != null && !lrc.isEmpty() && !lrc.equals("Unknown")) {
             lrcProcess.readLRCFormString(lrc, "UTF-8");

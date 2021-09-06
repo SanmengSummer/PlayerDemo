@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.util.Log;
+
 import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.model.MediaData;
 import com.landmark.media.model.MediaDataModel;

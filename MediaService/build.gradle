@@ -2,7 +2,8 @@ plugins {
     id 'com.android.application'
     id 'org.greenrobot.greendao'
 }
-
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
@@ -18,20 +19,20 @@ android {
     }
 
     signingConfigs {
+//        release {
+//            storeFile file("platform.jks")
+//            storePassword 'android'
+//            keyAlias 'key'
+//            keyPassword 'android'
+//        }
+//
+//        debug {
+//            keyAlias 'key'
+//            keyPassword 'android'
+//            storeFile file('platform.jks')
+//            storePassword 'android'
+//        }
         release {
-            storeFile file("platform.jks")
-            storePassword 'android'
-            keyAlias 'key'
-            keyPassword 'android'
-        }
-
-        debug {
-            keyAlias 'key'
-            keyPassword 'android'
-            storeFile file('platform.jks')
-            storePassword 'android'
-        }
-        /*release {
             storeFile file("platform.keystore")
             storePassword 'android'
             keyAlias 'platform'
@@ -43,7 +44,7 @@ android {
             storePassword 'android'
             keyAlias 'platform'
             keyPassword 'android'
-        }*/
+        }
     }
 
     buildTypes {
@@ -71,6 +72,7 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    implementation 'org.greenrobot:greendao:3.3.0' // 添加库
+    implementation 'org.greenrobot:greendao:3.3.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version" // 添加库
 
 }

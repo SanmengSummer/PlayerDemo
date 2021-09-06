@@ -12,6 +12,7 @@ import android.support.v4.media.session.IMediaControllerCallback;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -86,7 +87,7 @@ public class MediaPlayerManager {
      *
      * @param context             (Context  for Activity/Service/Application )For initConnect
      * @param iControllerCallback (replace of MediaControllerCompat.Callback)
-     * @param mediaId             ( Media Id for find out data of media)For initConnect
+     * @param mediaId             (Media Id for find out data of media)For initConnect
      *                            Date: 2021/8/25 14:54
      **/
     public void connectMediaSession(Context context,
@@ -131,26 +132,6 @@ public class MediaPlayerManager {
         mMediaBrowser = new MediaBrowserCompat(context,
                 new ComponentName(context, MediaService.class),
                 BrowserConnectionCallback, null);
-    }
-
-    /**
-     * Author: chenhuaxia
-     * Description:Set SurfaceView in MediaPlayer.
-     *
-     * @param surfaceView SurfaceView
-     *                    Date: 2021/8/25 14:54
-     **/
-    public void setSurfaceView(SurfaceView surfaceView) {
-        if (mController == null || null == surfaceView) return;
-        Bundle bundle = new Bundle();
-        SurfaceHolder holder = surfaceView.getHolder();
-        setSurface(holder, bundle);
-    }
-
-    private void setSurface(@NonNull SurfaceHolder holder, Bundle bundle) {
-        Surface surface = holder.getSurface();
-        bundle.putParcelable(CUSTOMS_ACTION_SET_SURFACE, surface);
-        getTransportControls().sendCustomAction(CUSTOMS_ACTION_SET_SURFACE, bundle);
     }
 
     /**
@@ -204,8 +185,23 @@ public class MediaPlayerManager {
     public void setOnMediaListDataChangeCallback(MediaListDataChangeCallback MediaListDataChangeCallback) {
         if (getTransportControls() == null) return;
         getTransportControls().sendCustomAction(CUSTOMS_ACTION_RETURN_CURRENT_POSITION, null);
-        if (mMediaListDataChangeCallback == null)
-            mMediaListDataChangeCallback = MediaListDataChangeCallback;
+        mMediaListDataChangeCallback = MediaListDataChangeCallback;
+    }
+
+    /**
+     * Author: chenhuaxia
+     * Description:Set SurfaceView in MediaPlayer.
+     *
+     * @param surfaceView SurfaceView
+     *                    Date: 2021/8/25 14:54
+     **/
+    public void setSurfaceView(SurfaceView surfaceView) {
+        if (mController == null || null == surfaceView) return;
+        Bundle bundle = new Bundle();
+        SurfaceHolder holder = surfaceView.getHolder();
+        Surface surface = holder.getSurface();
+        bundle.putParcelable(CUSTOMS_ACTION_SET_SURFACE, surface);
+        getTransportControls().sendCustomAction(CUSTOMS_ACTION_SET_SURFACE, bundle);
     }
 
     /**

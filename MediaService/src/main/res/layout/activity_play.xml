@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".PlayActivity">
+    tools:context=".controller.PlayActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -86,6 +86,7 @@
                 android:layout_height="wrap_content"
                 android:onClick="skipNext"
                 android:text="下一首" />
+
             <Button
                 android:id="@+id/cancel_collect"
                 android:layout_width="wrap_content"
@@ -97,7 +98,7 @@
         <RelativeLayout
             android:layout_width="400dp"
             android:layout_height="300dp"
-            android:layout_gravity="center">
+            android:layout_gravity="top">
 
             <SurfaceView
                 android:id="@+id/surfaceView"
@@ -119,13 +120,13 @@
                 android:layout_centerInParent="true" />
 
             <SeekBar
-                android:progressDrawable="@color/white"
                 android:id="@+id/seek"
                 android:layout_width="420dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_gravity="center"
-                android:layout_marginTop="10dp" />
+                android:layout_marginTop="10dp"
+                android:progressDrawable="@color/white" />
         </RelativeLayout>
 
 
