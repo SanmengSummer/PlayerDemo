@@ -56,7 +56,6 @@ class PlayActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         instance!!.connect()
-        setPlayMode(play_mode)
     }
 
     override fun onStop() {
@@ -83,6 +82,7 @@ class PlayActivity : AppCompatActivity() {
     }
 
     private fun initPlayer() {
+        matchPlayMode()
         initIndex = intent.getIntExtra(PlayerUtils.PLAYER_FOR_INDEX, 0)
         requestPermissions(101)
         instance = MediaPlayerManager.getInstance()
@@ -94,6 +94,7 @@ class PlayActivity : AppCompatActivity() {
             val surfaceView =
                 findViewById<SurfaceView>(R.id.surfaceView)
             instance!!.setSurfaceView(surfaceView)
+            instance!!.transportControls.playFromSearch(MediaConfig.MEDIA_PLAYER_LIST, null)
 
             instance!!.setOnMediaListDataChangeCallback(object : MediaListDataChangeCallback {
                 override fun getMediaListDataChangeCallback(
@@ -140,14 +141,14 @@ class PlayActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar) {
                 LogUtils.debug("MediaSessionCompat  onStopTrackingTouch: ")
                 val playbackState = instance!!.playbackState
-                if (playbackState == null || playbackState.state == PlaybackStateCompat.STATE_STOPPED) {
-                    val bundle = Bundle()
-                    bundle.putParcelableArrayList(MediaConfig.MEDIA_PLAYER_LIST, mediaItemList)
+                Log.e("TAG", "onStopTrackingTouch: $playbackState")
+                Log.e("TAG", "onStopTrackingTouch: $playbackState.state ")
+                if (playbackState == null || playbackState.state == PlaybackStateCompat.STATE_STOPPED)
                     instance!!.transportControls.playFromSearch(
                         MediaConfig.MEDIA_PLAYER_LIST,
-                        bundle
+                        null
                     )
-                }
+
                 assert(playbackState != null)
                 val extras = playbackState!!.extras!!
                 val duration = extras.getLong(MediaConfig.STATE_DURATION)
@@ -157,11 +158,9 @@ class PlayActivity : AppCompatActivity() {
         }
 
     fun start(view: View?) {
-        val bundle = Bundle()
-        bundle.putParcelableArrayList(MediaConfig.MEDIA_PLAYER_LIST, mediaItemList)
-        Log.e("TAG", "start: " + instance!!.playbackState.state)
-        if (instance!!.playbackState.state != PlaybackStateCompat.STATE_PLAYING)
-            instance!!.transportControls.playFromSearch(MediaConfig.MEDIA_PLAYER_LIST, bundle)
+        if (instance!!.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
+            instance!!.transportControls.stop()
+        instance!!.transportControls.playFromSearch(MediaConfig.MEDIA_PLAYER_LIST, null)
     }
 
     fun play_pause(view: View?) {
@@ -176,35 +175,67 @@ class PlayActivity : AppCompatActivity() {
 
     fun play_mode(v: View?) {
         playMode++
-        setPlayMode(v as Button?)
+        setPlayMode()
     }
 
-    private fun setPlayMode(view: Button?) {
+    private fun setPlayMode() {
         when (playMode) {
             1 -> {
-                view!!.text = "随机播放"
-                instance!!.setPlayerMode(MediaPlayerManager.random, false)
+                play_mode.text = "随机播放"
+                instance!!.setPlayerMode(QueueManager.random, false)
             }
             2 -> {
-                view!!.text = "单曲播放"
-                instance!!.setPlayerMode(MediaPlayerManager.single, false)
+                play_mode.text = "单曲播放"
+                instance!!.setPlayerMode(QueueManager.single, false)
             }
             3 -> {
-                view!!.text = "顺序循环"
-                instance!!.setPlayerMode(MediaPlayerManager.order, true)
+                play_mode.text = "顺序循环"
+                instance!!.setPlayerMode(QueueManager.order, true)
             }
             4 -> {
-                view!!.text = "随机循环"
-                instance!!.setPlayerMode(MediaPlayerManager.random, true)
+                play_mode.text = "随机循环"
+                instance!!.setPlayerMode(QueueManager.random, true)
             }
             5 -> {
-                view!!.text = "单曲循环"
-                instance!!.setPlayerMode(MediaPlayerManager.single, true)
+                play_mode.text = "单曲循环"
+                instance!!.setPlayerMode(QueueManager.single, true)
             }
             6, 0 -> {
                 playMode = 0
-                view!!.text = "顺序播放"
-                instance!!.setPlayerMode(MediaPlayerManager.order, false)
+                play_mode.text = "顺序播放"
+                instance!!.setPlayerMode(QueueManager.order, false)
+            }
+        }
+    }
+
+    private fun matchPlayMode() {
+        when (QueueManager.mMode) {
+            QueueManager.order -> {
+                playMode = if (QueueManager.isLoop) {
+                    play_mode.text = "顺序循环"
+                    3
+                } else {
+                    play_mode.text = "顺序播放"
+                    0
+                }
+            }
+            QueueManager.random -> {
+                playMode = if (QueueManager.isLoop) {
+                    play_mode.text = "随机播放"
+                    4
+                } else {
+                    play_mode.text = "随机循环"
+                    1
+                }
+            }
+            QueueManager.single -> {
+                playMode = if (QueueManager.isLoop) {
+                    play_mode.text = "单曲播放"
+                    5
+                } else {
+                    play_mode.text = "单曲循环"
+                    2
+                }
             }
         }
     }
@@ -235,11 +266,31 @@ class PlayActivity : AppCompatActivity() {
     }
 
     fun collect(view: View?) {
-        instance!!.addCollect()
+        addCollect()
     }
 
     fun cancel_collect(view: View?) {
-        instance!!.cancelCollect()
+        cancelCollect()
+    }
+
+    /**
+     * Author: chenhuaxia
+     * Description:Add Collect by MediaDataHelper .
+     */
+    fun addCollect() {
+        val b = MediaDataHelper.getInstance(this)
+            .addCollectList(mediaItemList!![QueueManager.currentPlayIndex]?.mediaId)
+        Toast.makeText(this, if (b) "收藏成功！" else "收藏失败！", Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * Author: chenhuaxia
+     * Description:Cancel Collect by MediaDataHelper .
+     */
+    fun cancelCollect() {
+        val b = MediaDataHelper.getInstance(this)
+            .cancelCollectList(mediaItemList!![QueueManager.currentPlayIndex]?.mediaId)
+        Toast.makeText(this, if (b) "取消收藏成功！" else "取消收藏失败！", Toast.LENGTH_SHORT).show()
     }
 
     @SuppressLint("NewApi")
@@ -264,5 +315,10 @@ class PlayActivity : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    override fun onDestroy() {
+        instance!!.release()
+        super.onDestroy()
     }
 }

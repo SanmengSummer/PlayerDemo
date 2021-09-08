@@ -22,7 +22,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="start"
-                android:text="开始播放" />
+                android:text="重新播放" />
 
             <Button
                 android:id="@+id/btn_play_pause"

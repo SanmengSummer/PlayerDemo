@@ -36,9 +36,6 @@ import java.util.List;
  * Date: 2021/8/15 15:55
  **/
 public class MediaPlayerManager {
-    public static final int random = PlaybackStateCompat.SHUFFLE_MODE_NONE;
-    public static final int single = PlaybackStateCompat.SHUFFLE_MODE_ALL;
-    public static final int order = PlaybackStateCompat.SHUFFLE_MODE_GROUP;
     @SuppressLint("StaticFieldLeak")
     private static MediaPlayerManager mInstance;
     private MediaBrowserCompat mMediaBrowser;
@@ -49,10 +46,8 @@ public class MediaPlayerManager {
     private MediaControllerCompat.TransportControls transportControls;
     private Context mContext;
     private String mMediaId;
-    private List<MediaBrowserCompat.MediaItem> mMediaItemList;
-    private static int mCurrentIndex = 0;
-    private static int mMode = order;
-    private static int previousIndex = mCurrentIndex;
+
+    private static int previousIndex = QueueManager.currentPlayIndex;
 
     /**
      * Author: chenhuaxia
@@ -212,15 +207,10 @@ public class MediaPlayerManager {
      * @param isLoop boolean(loop or nu-loop)
      **/
     public void setPlayerMode(int mode, boolean isLoop) {
-        mMode = mode;
         if (getTransportControls() == null) return;
-        setPlayerMediaItemList(mode);
+        getTransportControls().setShuffleMode(mode);
         getTransportControls().setRepeatMode(isLoop ? PlaybackStateCompat.REPEAT_MODE_ALL :
                 PlaybackStateCompat.REPEAT_MODE_NONE);
-    }
-
-    private void setPlayerMediaItemList(int mode) {
-        getTransportControls().setShuffleMode(mode);
     }
 
     private final MediaBrowserCompat.ConnectionCallback BrowserConnectionCallback =
@@ -277,10 +267,9 @@ public class MediaPlayerManager {
 
     /**
      * Author: chenhuaxia
-     * Description:Release MediaSession .
+     * Description:Release manager .
      **/
     public void release() {
-        mController.sendCommand(ACTION_RELEASE, null, null);
         mInstance = null;
         mContext = null;
         mController = null;
@@ -289,21 +278,16 @@ public class MediaPlayerManager {
 
     /**
      * Author: chenhuaxia
-     * Description:Add Collect by MediaDataHelper .
+     * Description:Release Manager  and MediaSession .
      **/
-    public void addCollect() {
-        boolean b = MediaDataHelper.getInstance(mContext).addCollectList(mMediaItemList.get(mCurrentIndex).getMediaId());
-        Toast.makeText(mContext, b ? "收藏成功！" : "收藏失败！", Toast.LENGTH_SHORT).show();
+    public void releaseAll() {
+        mController.sendCommand(ACTION_RELEASE, null, null);
+        mInstance = null;
+        mContext = null;
+        mController = null;
+        mMediaBrowser = null;
     }
 
-    /**
-     * Author: chenhuaxia
-     * Description:Cancel Collect by MediaDataHelper .
-     **/
-    public void cancelCollect() {
-        boolean b = MediaDataHelper.getInstance(mContext).cancelCollectList(mMediaItemList.get(mCurrentIndex).getMediaId());
-        Toast.makeText(mContext, b ? "取消收藏成功！" : "取消收藏失败！", Toast.LENGTH_SHORT).show();
-    }
 
     /**
      * Author: chenhuaxia
@@ -331,10 +315,8 @@ public class MediaPlayerManager {
                 @Override
                 public void onChildrenLoaded(@NonNull String parentId,
                                              @NonNull List<MediaBrowserCompat.MediaItem> children) {
-                    mMediaItemList = children;
-                    setPlayerMediaItemList(mMode);
                     if (mRegisterSessionCallback != null)
-                        mRegisterSessionCallback.registerSuccess(mMediaItemList);
+                        mRegisterSessionCallback.registerSuccess(children);
                 }
 
                 @Override
@@ -348,8 +330,6 @@ public class MediaPlayerManager {
         public void onSessionReady() {
             super.onSessionReady();
             LogUtils.debug("MediaControllerCompat onSessionReady: ");
-            if (mMediaListDataChangeCallback != null)
-                mMediaListDataChangeCallback.updateCurrentMedia(QueueManager.getCurrentPlayList(), mCurrentIndex);
         }
 
         @Override
@@ -368,10 +348,10 @@ public class MediaPlayerManager {
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             super.onPlaybackStateChanged(state);
             LogUtils.debug("MediaControllerCompat onPlaybackStateChanged: " + state.toString());
-            if (mMediaListDataChangeCallback != null && previousIndex != mCurrentIndex) {
-                mMediaListDataChangeCallback.updateCurrentMedia(QueueManager.getCurrentPlayList(), mCurrentIndex);
-                previousIndex = mCurrentIndex;
+            if (mMediaListDataChangeCallback != null && previousIndex != QueueManager.currentPlayIndex) {
+                mMediaListDataChangeCallback.updateCurrentMedia(QueueManager.getCurrentPlayList(), QueueManager.currentPlayIndex);
             }
+            previousIndex = QueueManager.currentPlayIndex;
         }
 
 
@@ -398,7 +378,6 @@ public class MediaPlayerManager {
             super.onExtrasChanged(extras);
             try {
                 if (mMediaListDataChangeCallback != null) {
-                    mCurrentIndex = extras.getInt(CUSTOMS_ACTION_RETURN_CURRENT_INDEX);
                     long mCurrentPosition = extras.getLong(CUSTOMS_ACTION_RETURN_CURRENT_POSITION);
                     LrcProcess.LrcContent mLrcContent = extras.getParcelable(CUSTOMS_ACTION_RETURN_CURRENT_LRC);
                     if (mCurrentPosition > -1 && mLrcContent != null)

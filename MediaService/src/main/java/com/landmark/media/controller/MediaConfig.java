@@ -28,7 +28,6 @@ public class MediaConfig {
      */
     public final static String ACTION_RELEASE = "action_release";
     public final static String CUSTOMS_ACTION_SET_SURFACE = "customs_action_set_surface";
-    public final static String CUSTOMS_ACTION_RETURN_CURRENT_INDEX = "customs_action_return_current_index";
     public final static String CUSTOMS_ACTION_RETURN_CURRENT_POSITION = "customs_action_return_current_position";
     public final static String CUSTOMS_ACTION_RETURN_CURRENT_LRC = "customs_action_return_current_lrc";
 }

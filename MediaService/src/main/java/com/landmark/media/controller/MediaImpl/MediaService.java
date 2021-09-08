@@ -50,11 +50,8 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
     private PlayerAdapter mPlayerAdapter;
     private static final float mPlaybackSpeed = 1.0f;
     private static final long distance = 5000;
-    private static int mCurrentIndex = 0;
-    private static boolean isLoop = true;
     private static boolean hasGetLrcAction = false;
 
-    private List<MediaMetadataCompat> mCurrentPlayList;
     private String currentMediaId;
     private Uri uri;
 
@@ -112,11 +109,12 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
                     String path = extras.getString(MEDIA_PLAYER_PATH);
                     mPlayerAdapter.preparePlayForPath(path);
                 } else if (query.equals(MEDIA_PLAYER_LIST)) {
-                    MediaMetadataCompat mediaMetadataCompat = mCurrentPlayList.get(mCurrentIndex);
+                    MediaMetadataCompat mediaMetadataCompat = QueueManager.getCurrentPlayList().get(QueueManager.currentPlayIndex);
                     currentMediaId = mediaMetadataCompat.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID);
+                    uri = UriToPathUtil.getUri(
+                            mediaMetadataCompat.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI));
                     mPlayerAdapter.preparePlayForUri(MediaService.this,
-                            UriToPathUtil.getUri(
-                                    mediaMetadataCompat.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI)));
+                            uri);
                 }
                 buildState(PlaybackStateCompat.STATE_CONNECTING);
             } catch (Exception e) {
@@ -136,9 +134,6 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
                 case CUSTOMS_ACTION_SET_SURFACE:
                     Surface surface = extras.getParcelable(CUSTOMS_ACTION_SET_SURFACE);
                     mPlayerAdapter.setSurface(surface);
-                    break;
-                case CUSTOMS_ACTION_RETURN_CURRENT_INDEX:
-                    currentIndexBack();
                     break;
                 case CUSTOMS_ACTION_RETURN_CURRENT_POSITION:
                     hasGetLrcAction = true;
@@ -198,10 +193,10 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
         public void onSkipToQueueItem(long id) {
             super.onSkipToQueueItem(id);
             LogUtils.debug("MediaSessionCompat  onSkipToQueueItem: ");
-            if (id < mCurrentPlayList.size() && id >= 0) {
+            if (id < QueueManager.getCurrentPlayList().size() && id >= 0) {
                 MediaDataHelper.getInstance(MediaService.this).addHistoryList(currentMediaId, mPlayerAdapter.getCurrentPosition(), mPlayerAdapter.getDuration());
-                mCurrentIndex = (int) id;
-                currentIndexBack();
+                QueueManager.setCurrentPlayIndex((int) id);
+                getCurrentUri();
                 onPlayFromSearch(MEDIA_PLAYER_LIST, null);
             } else Toast.makeText(MediaService.this, "不存在该歌曲", Toast.LENGTH_SHORT).show();
         }
@@ -226,37 +221,35 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
                 Toast.makeText(MediaService.this, "播放错误", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (mCurrentIndex < mCurrentPlayList.size() - 1) {
+            if (QueueManager.currentPlayIndex < QueueManager.getCurrentPlayList().size() - 1) {
                 MediaDataHelper.getInstance(MediaService.this).addHistoryList(currentMediaId, mPlayerAdapter.getCurrentPosition(), mPlayerAdapter.getDuration());
-                mCurrentIndex++;
-                currentIndexBack();
+                QueueManager.currentPlayIndex++;
                 onPlayFromSearch(MEDIA_PLAYER_LIST, null);
             } else {
-                if (isLoop) {
+                if (QueueManager.isLoop) {
                     MediaDataHelper.getInstance(MediaService.this).addHistoryList(currentMediaId, mPlayerAdapter.getCurrentPosition(), mPlayerAdapter.getDuration());
-                    mCurrentIndex = 0;
-                    currentIndexBack();
+                    QueueManager.setCurrentPlayIndex(0);
                     onPlayFromSearch(MEDIA_PLAYER_LIST, null);
                 } else
                     Toast.makeText(MediaService.this, "到底了", Toast.LENGTH_SHORT).show();
             }
+            getCurrentUri();
         }
 
         private void playPrevious() {
-            if (mCurrentIndex > 0) {
+            if (QueueManager.currentPlayIndex > 0) {
                 MediaDataHelper.getInstance(MediaService.this).addHistoryList(currentMediaId, mPlayerAdapter.getCurrentPosition(), mPlayerAdapter.getDuration());
-                mCurrentIndex--;
-                currentIndexBack();
+                QueueManager.currentPlayIndex--;
                 onPlayFromSearch(MEDIA_PLAYER_LIST, null);
             } else {
-                if (isLoop) {
+                if (QueueManager.isLoop) {
                     MediaDataHelper.getInstance(MediaService.this).addHistoryList(currentMediaId, mPlayerAdapter.getCurrentPosition(), mPlayerAdapter.getDuration());
-                    mCurrentIndex = mCurrentPlayList.size() - 1;
-                    currentIndexBack();
+                    QueueManager.setCurrentPlayIndex(QueueManager.getCurrentPlayList().size() - 1);
                     onPlayFromSearch(MEDIA_PLAYER_LIST, null);
                 } else
                     Toast.makeText(MediaService.this, "到头了", Toast.LENGTH_SHORT).show();
             }
+            getCurrentUri();
         }
 
         @Override
@@ -321,11 +314,11 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
                     break;
                 case PlaybackStateCompat.REPEAT_MODE_ALL:
                 case PlaybackStateCompat.REPEAT_MODE_GROUP:
-                    isLoop = true;
+                    QueueManager.isLoop = true;
                     break;
                 case PlaybackStateCompat.REPEAT_MODE_NONE:
                 case PlaybackStateCompat.REPEAT_MODE_INVALID:
-                    isLoop = false;
+                    QueueManager.isLoop = false;
                     break;
             }
         }
@@ -335,43 +328,20 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
             super.onSetShuffleMode(shuffleMode);
             switch (shuffleMode) {
                 case PlaybackStateCompat.SHUFFLE_MODE_NONE://随机
-                    mCurrentPlayList = QueueManager.getRandomPlayList();
+                    QueueManager.getRandomPlayList();
                     break;
                 case PlaybackStateCompat.SHUFFLE_MODE_ALL://单曲
-                    mCurrentPlayList = QueueManager.getSinglePlayList(mCurrentIndex);
+                    QueueManager.getSinglePlayList(QueueManager.currentPlayIndex);
                     break;
                 case PlaybackStateCompat.SHUFFLE_MODE_GROUP://顺序
                 case PlaybackStateCompat.SHUFFLE_MODE_INVALID:
-                    mCurrentPlayList = QueueManager.getOrderPlayList();
+                    QueueManager.getOrderPlayList();
                     break;
             }
-            getCurrentIndex();
-            currentIndexBack();
+            matchCurrentIndex();
+            getCurrentUri();
         }
 
-        @Override
-        public void onAddQueueItem(MediaDescriptionCompat description) {
-            super.onAddQueueItem(description);
-            LogUtils.debug("MediaSessionCompat  onAddQueueItem: " + description);
-        }
-
-        @Override
-        public void onAddQueueItem(MediaDescriptionCompat description, int index) {
-            super.onAddQueueItem(description, index);
-            LogUtils.debug("MediaSessionCompat  onAddQueueItem: " + description);
-        }
-
-        @Override
-        public void onRemoveQueueItem(MediaDescriptionCompat description) {
-            super.onRemoveQueueItem(description);
-            LogUtils.debug("MediaSessionCompat  onAddQueueItem: " + description);
-        }
-
-        @Override
-        public void onRemoveQueueItemAt(int index) {
-            super.onRemoveQueueItemAt(index);
-            LogUtils.debug("MediaSessionCompat  onRemoveQueueItemAt: " + index);
-        }
 
         @Override
         public void onSetPlaybackSpeed(float speed) {
@@ -390,28 +360,27 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
     public void onLoadChildren(@NonNull String parentMediaId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
         result.detach();
         List<MediaBrowserCompat.MediaItem> mediaItems = QueueManager.getData();
-        mCurrentIndex = QueueManager.mInitPosition;
-        currentMediaId = mediaItems.get(mCurrentIndex).getMediaId();
+        currentMediaId = mediaItems.get(QueueManager.currentPlayIndex).getMediaId();
         result.sendResult(mediaItems);
     }
 
 
-    private void currentIndexBack() {
-        Bundle bundle = new Bundle();
-        bundle.putInt(CUSTOMS_ACTION_RETURN_CURRENT_INDEX, mCurrentIndex);
-        uri = UriToPathUtil.getUri(mCurrentPlayList.get(mCurrentIndex).getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI));
-        mSession.setExtras(bundle);
+    private void getCurrentUri() {
+        uri = UriToPathUtil.getUri(QueueManager.getCurrentPlayList().get(QueueManager.currentPlayIndex).getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI));
     }
 
-    public int getCurrentIndex() {
-        mCurrentIndex = 0;
-        if (mCurrentPlayList != null && !mCurrentPlayList.isEmpty() && mCurrentPlayList.size() > 1)
-            mCurrentPlayList.forEach(mediaDataModel -> {
-                if (mediaDataModel.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID) == currentMediaId) {
-                    mCurrentIndex = mCurrentPlayList.indexOf(mediaDataModel);
+    /**
+     * Match current index ,only use for under change of ShuffleMode.
+     *
+     * @DATE 2021/9/8 @Time 11:45
+     */
+    private void matchCurrentIndex() {
+        if (QueueManager.getCurrentPlayList() != null && !QueueManager.getCurrentPlayList().isEmpty() && QueueManager.getCurrentPlayList().size() > 1)
+            QueueManager.getCurrentPlayList().forEach(mediaDataModel -> {
+                if (mediaDataModel.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID).equals(currentMediaId)) {
+                    QueueManager.setCurrentPlayIndex(QueueManager.getCurrentPlayList().indexOf(mediaDataModel));
                 }
             });
-        return mCurrentIndex;
     }
 
     private void initState() {
@@ -480,7 +449,7 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
     }
 
     private LrcProcess.LrcContent getLrcContent() {
-        if (!uri.toString().contains(".mp3")) return null;
+        if (uri == null || !uri.toString().contains(".mp3")) return null;
         Bundle bundle = new Bundle();
         LrcProcess lrcProcess = new LrcProcess();
         LrcProcess.LrcContent mLrcContent = new LrcProcess.LrcContent();
@@ -493,8 +462,8 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
         String lrc = null;
         try {
 //            MetaInfoParser_MP3 metaInfoParser_mp3 = new MetaInfoParser_MP3();
-            MP3ReadID3v2 metaInfoParser_mp3 = new MP3ReadID3v2(UriToPathUtil.getRealFile(this, uri));
 //            metaInfoParser_mp3.parse(UriToPathUtil.getRealFile(this, uri));
+            MP3ReadID3v2 metaInfoParser_mp3 = new MP3ReadID3v2(UriToPathUtil.getRealFile(this, uri));
             lrc = metaInfoParser_mp3.getLrc();
         } catch (Exception ignored) {
         }
@@ -527,7 +496,6 @@ public class MediaService extends MediaBrowserServiceCompat implements PlayerSta
         }
         if (mLrcContent == null || mLrcContent.getLrc() == null)
             mLrcContent = new LrcProcess.LrcContent("", 0);
-        bundle.putInt(CUSTOMS_ACTION_RETURN_CURRENT_INDEX, mCurrentIndex);
         bundle.putLong(CUSTOMS_ACTION_RETURN_CURRENT_POSITION, currentPosition);
         bundle.putParcelable(CUSTOMS_ACTION_RETURN_CURRENT_LRC, mLrcContent);
         mSession.setExtras(bundle);
