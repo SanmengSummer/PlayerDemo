@@ -48,6 +48,7 @@
             android:screenOrientation="landscape" />
 
         <service android:name=".controller.MediaImpl.MediaService" />
+        <service android:name=".controller.MediaImpl.exo.MediaServiceExo" />
     </application>
 
 </manifest>

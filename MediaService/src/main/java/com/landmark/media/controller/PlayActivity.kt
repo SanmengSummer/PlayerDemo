@@ -141,8 +141,6 @@ class PlayActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar) {
                 LogUtils.debug("MediaSessionCompat  onStopTrackingTouch: ")
                 val playbackState = instance!!.playbackState
-                Log.e("TAG", "onStopTrackingTouch: $playbackState")
-                Log.e("TAG", "onStopTrackingTouch: $playbackState.state ")
                 if (playbackState == null || playbackState.state == PlaybackStateCompat.STATE_STOPPED)
                     instance!!.transportControls.playFromSearch(
                         MediaConfig.MEDIA_PLAYER_LIST,

@@ -74,5 +74,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     implementation 'org.greenrobot:greendao:3.3.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version" // 添加库
+    implementation 'com.google.android.exoplayer:exoplayer:2.13.3'
 
 }

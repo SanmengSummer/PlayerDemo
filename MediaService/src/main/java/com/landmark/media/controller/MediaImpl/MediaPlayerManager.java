@@ -12,20 +12,18 @@ import android.support.v4.media.session.IMediaControllerCallback;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.landmark.media.controller.MediaImpl.exo.MediaServiceExo;
 import com.landmark.media.controller.QueueManager;
 import com.landmark.media.controller.utils.LogUtils;
 import com.landmark.media.controller.utils.LrcProcess;
 import com.landmark.media.controller.utils.PlayerUtils;
-import com.landmark.media.db.data.MediaDataHelper;
 import com.landmark.media.model.MediaData;
 
 import java.util.List;
@@ -125,7 +123,7 @@ public class MediaPlayerManager {
         mContext = context;
         mMediaId = mediaId;
         mMediaBrowser = new MediaBrowserCompat(context,
-                new ComponentName(context, MediaService.class),
+                new ComponentName(context, MediaServiceExo.class),
                 BrowserConnectionCallback, null);
     }
 

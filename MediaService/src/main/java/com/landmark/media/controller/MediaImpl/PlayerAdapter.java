@@ -58,10 +58,6 @@ public class PlayerAdapter {
         if (mMediaPlayer.isPlaying()) mMediaPlayer.pause();
     }
 
-    public void reset() {
-        if (mMediaPlayer == null) return;
-        mMediaPlayer.reset();
-    }
 
     public void setSurface(Surface surface) {
         if (mMediaPlayer == null) return;
@@ -72,16 +68,6 @@ public class PlayerAdapter {
         if (mMediaPlayer == null) return;
         mMediaPlayer.release();
         mMediaPlayer = null;
-    }
-
-    public void setVolume(float leftVolume, float rightVolume) {
-        if (mMediaPlayer == null) return;
-        mMediaPlayer.setVolume(leftVolume, rightVolume);
-    }
-
-    public void setLooping(boolean looping) {
-        if (mMediaPlayer == null) return;
-        mMediaPlayer.setLooping(looping);
     }
 
     public long getCurrentPosition() {
@@ -95,6 +81,21 @@ public class PlayerAdapter {
         return mMediaPlayer.getDuration();
     }
 
+    public void reset() {
+        if (mMediaPlayer == null) return;
+        mMediaPlayer.reset();
+    }
+
+    public void setVolume(float leftVolume, float rightVolume) {
+        if (mMediaPlayer == null) return;
+        mMediaPlayer.setVolume(leftVolume, rightVolume);
+    }
+
+    public void setLooping(boolean looping) {
+        if (mMediaPlayer == null) return;
+        mMediaPlayer.setLooping(looping);
+    }
+
     public long getVideoHeight() {
         if (mMediaPlayer == null) return 0;
         return mMediaPlayer.getVideoHeight();
@@ -105,6 +106,11 @@ public class PlayerAdapter {
         return mMediaPlayer.getVideoWidth();
     }
 
+    public void setVideoScalingMode(int scalingMode) {
+        if (mMediaPlayer == null) return;
+        mMediaPlayer.setVideoScalingMode(scalingMode);
+    }
+
     public void seekTo(int position) {
         if (mMediaPlayer == null) return;
         if (mMediaPlayer.isPlaying()) {
@@ -113,11 +119,6 @@ public class PlayerAdapter {
             mMediaPlayer.seekTo(position);
             mMediaPlayer.pause();
         }
-    }
-
-    public void setVideoScalingMode(int scalingMode) {
-        if (mMediaPlayer == null) return;
-        mMediaPlayer.setVideoScalingMode(scalingMode);
     }
 
     public void setPlaybackParams(float speed) {
